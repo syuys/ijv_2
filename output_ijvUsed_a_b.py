@@ -4,6 +4,10 @@
 Created on Mon Sep 28 11:35:19 2020
 
 @author: md703
+
+Objective: Transform (a,b) referred in Jacques's paper into new one.
+Reason: Our reference_wl is different from Jacuqes's paper.
+        Ours is 745nm, but Jacques's is 500nm.
 """
 
 import numpy as np
@@ -12,7 +16,7 @@ from scipy.optimize import curve_fit
 import json
 plt.rcParams.update({'mathtext.default': 'regular'})
 plt.rcParams["font.family"] = "Times New Roman"
-plt.rcParams['figure.dpi'] = 150
+plt.rcParams['figure.dpi'] = 200
 
 #%% function
 ref_wl_jacques = 500
