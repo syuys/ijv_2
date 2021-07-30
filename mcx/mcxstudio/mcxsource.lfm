@@ -1,0 +1,166 @@
+object fmSource: TfmSource
+  Left = 1261
+  Height = 379
+  Top = 311
+  Width = 326
+  BorderIcons = []
+  Caption = 'Light Source Settings'
+  ClientHeight = 379
+  ClientWidth = 326
+  DesignTimePPI = 94
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poOwnerFormCenter
+  LCLVersion = '1.8.2.0'
+  object edSource: TComboBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label4
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 55
+    Height = 27
+    Top = 47
+    Width = 216
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 55
+    BorderSpacing.Top = 9
+    BorderSpacing.Right = 55
+    ItemHeight = 0
+    ItemIndex = 0
+    Items.Strings = (
+      'pencil'
+      'isotropic'
+      'cone'
+      'gaussian'
+      'planar'
+      'pattern'
+      'pattern3d'
+      'fourier'
+      'arcsine'
+      'disk'
+      'fourierx'
+      'fourierx2d'
+      'zgaussian'
+      'line'
+      'slit'
+      'pencilarray'
+    )
+    OnEditingDone = edSourceEditingDone
+    ParentFont = False
+    TabOrder = 0
+    Text = 'pencil'
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 49
+    Top = 330
+    Width = 326
+    Align = alBottom
+    BevelOuter = bvNone
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 49
+    ClientWidth = 326
+    ParentFont = False
+    TabOrder = 1
+    object btOK: TButton
+      AnchorSideTop.Control = Panel1
+      AnchorSideTop.Side = asrCenter
+      Left = 63
+      Height = 27
+      Top = 11
+      Width = 86
+      Caption = 'OK'
+      ModalResult = 1
+      OnClick = btOKClick
+      ParentFont = False
+      TabOrder = 0
+    end
+    object btCancel: TButton
+      AnchorSideLeft.Control = btOK
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      Left = 182
+      Height = 27
+      Top = 11
+      Width = 86
+      BorderSpacing.Left = 33
+      BorderSpacing.Right = 19
+      Caption = 'Cancel'
+      ModalResult = 2
+      ParentFont = False
+      TabOrder = 1
+    end
+  end
+  object Label4: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 39
+    Height = 14
+    Top = 24
+    Width = 287
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 39
+    BorderSpacing.Top = 24
+    Caption = 'Please select a light source type:'
+    ParentColor = False
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+  end
+  object plEditor: TValueListEditor
+    AnchorSideTop.Control = Label5
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = edSource
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Panel1
+    Left = 55
+    Height = 220
+    Top = 110
+    Width = 216
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    AutoAdvance = aaDown
+    BorderSpacing.Top = 7
+    DefaultColWidth = 137
+    FixedCols = 0
+    ParentFont = False
+    RowCount = 2
+    TabOrder = 2
+    Strings.Strings = (
+      ''
+    )
+    TitleCaptions.Strings = (
+      'Parameter'
+      'Value'
+    )
+    ColWidths = (
+      137
+      77
+    )
+  end
+  object Label5: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = edSource
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 39
+    Height = 14
+    Top = 89
+    Width = 287
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 39
+    BorderSpacing.Top = 15
+    Caption = 'Please define source parameters:'
+    ParentColor = False
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+  end
+end

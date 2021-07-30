@@ -1,0 +1,85 @@
+object fmStop: TfmStop
+  Left = 867
+  Height = 209
+  Top = 284
+  Width = 255
+  Align = alBottom
+  BorderStyle = bsDialog
+  Caption = 'Running ...'
+  ClientHeight = 209
+  ClientWidth = 255
+  DesignTimePPI = 110
+  Position = poOwnerFormCenter
+  LCLVersion = '2.0.8.0'
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 137
+    Top = 49
+    Width = 255
+    Align = alBottom
+    AutoSize = True
+    ButtonHeight = 137
+    ButtonWidth = 117
+    Caption = 'Running'
+    EdgeInner = esNone
+    EdgeOuter = esNone
+    HotImages = fmMCX.ImageList2
+    Images = fmMCX.ImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 0
+    Transparent = True
+    object tbtStop: TToolButton
+      Left = 1
+      Top = 0
+      Action = fmMCX.mcxdoStop
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton8: TToolButton
+      Left = 118
+      Height = 137
+      Top = 0
+      Caption = 'ToolButton8'
+      Style = tbsDivider
+    end
+    object ToolButton3: TToolButton
+      Left = 124
+      Hint = 'Hide this window'
+      Top = 0
+      Caption = 'Hide'
+      ImageIndex = 13
+      OnClick = ToolButton3Click
+      ParentShowHint = False
+      ShowHint = True
+    end
+  end
+  object Memo1: TMemo
+    Left = 0
+    Height = 49
+    Top = 0
+    Width = 255
+    Align = alClient
+    Font.Style = [fsItalic]
+    Lines.Strings = (
+      ''
+      'Press "Terminate" to force stop.'
+    )
+    ParentFont = False
+    ReadOnly = True
+    TabOrder = 1
+  end
+  object pbProgress: TProgressBar
+    Left = 0
+    Height = 23
+    Top = 186
+    Width = 255
+    Align = alBottom
+    ParentFont = False
+    Smooth = True
+    Step = 1
+    TabOrder = 2
+    BarShowText = True
+  end
+end
