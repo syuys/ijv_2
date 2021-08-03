@@ -1,0 +1,26 @@
+{
+
+    "session_id": "quicktest",
+    "type": "ijv",
+
+    "num_photon": 2e7,
+    "photon_batch": 5e9,
+    "voxel_size": 0.25,
+
+    "binary_path": "mcx/bin/mcx",
+
+    "medium_n": 1.457,
+    "detector_na": 0.12,
+
+    "coefficients": "input/coefficients.csv",
+    "parameters": "input/parameters/20190502_max.json",
+    "wavelength": "input/wavelength/quicktest.csv",
+    "fiber": "input/fiber.csv",
+    "mcx_input": "input_mcx/ijv_no_prism.json",
+
+
+    "phantom_idx": "H",
+    "phantom_mua": "CHIKEN/mua_in_mm.csv",
+    "phantom_musp": "CHIKEN/musp_in_mm.csv"
+
+}

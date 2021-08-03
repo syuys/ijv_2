@@ -1,0 +1,31 @@
+{
+
+    "session_id": "artery_template",
+    "type": "ijv",
+
+    "num_photon": 2e8,
+    "photon_batch": 5e9,
+    "voxel_size": 0.25,
+
+    "binary_path": "mcx/bin/mcx",
+
+    "medium_n": 1,
+    "detector_na": 0.866,
+
+    "coefficients": "input/coefficients.csv",
+    "parameters": "input/parameters.json",
+    "wavelength": "input/artery_wavelength.csv",
+    "fiber": "input/fiber.csv",
+    "mcx_input": "input_mcx/case0625.json",
+
+
+    "phantom_idx": "H",
+    "phantom_mua": "CHIKEN/mua_in_mm.csv",
+    "phantom_musp": "CHIKEN/musp_in_mm.csv",
+
+    "replay": false,
+    "replay_mch_high": "/home/md703/ijv/output/quicktest_path_high_mus/mcx_output/quicktest_path_high_mus_700.mch",
+    "replay_mch": "/home/md703/ijv/output/quicktest_path/mcx_output/quicktest_path_700.mch"
+
+
+}

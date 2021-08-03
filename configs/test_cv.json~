@@ -1,0 +1,26 @@
+{
+
+    "session_id": "test_cv_5",
+    "type": "test_cv",
+
+    "num_photon": 5e5,
+    "photon_batch": 5e10,
+    "voxel_size": 0.25,
+
+    "binary_path": "mcx/bin/mcx",
+
+    "medium_n": 1.457,
+    "detector_na": 0.12,
+
+    "coefficients": "input/coefficients.csv",
+    "parameters": "input/parameters/20190502_max.json",
+    "wavelength": "input/wavelength/test_cv.csv",
+    "fiber": "input/fiber_phantom.csv",
+    "mcx_input": "input_mcx/ijv_no_prism.json",
+
+
+    "phantom_idx": "",
+    "phantom_mua": "phantom/mua_in_mm.csv",
+    "phantom_musp": "phantom/musp_in_mm.csv"
+
+}
