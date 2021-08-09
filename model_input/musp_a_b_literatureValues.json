@@ -1,0 +1,34 @@
+{
+    "//comment": "All the (a,b) values below, except for 'blood', come from Steven L Jacques's paper --> 'Corrigendum: Optical properties of biological tissues: a review'(2013). The values of 'blood' are from toast's estimation. Additionally, the equation I use to calulate musp is based on --> musp = a * (wl/500)^-b, which is the one used in Jacques's paper mentioned earlier. The unit of calulated musp is cm-1.",
+    
+    "contents": {
+    
+        "skin": {
+            "Anderson et al 1982": [48.9, 1.548],
+            "Jacques 1996": [47.8, 2.453],
+            "Simpson et al 1998": [37.2, 1.39],
+            "Saidi et al 1995": [60.1, 1.722],
+            "Bashkatov et al 2011": [29.7, 0.705],
+            "Salomatina et al 2006 (Dermis)": [45.3, 1.292],
+            "Alexandrakis et al 2005": [30.6, 1.1]
+        },
+        
+        "fatty tissue": {
+            "Simpson et al 1998 (Subcutaneous fat)": [13.7, 0.385],
+            "Bashkatov et al 2011 (Subcutaneous adipose)": [15.4, 0.68],
+            "Salomatina et al 2006 (Subcut. fat)": [35.2, 0.988],
+            "Salomatina et al 2006 (Subcut. adipocytes)": [21.6, 0.93],
+            "Alexandrakis et al 2005 (Adipose)": [14.1, 0.53]
+        },
+        
+        "muscle": {
+            "Tromberg 1996": [13, 0.926],
+            "Alexandrakis et al 2005": [9.8, 2.82]
+        },
+        
+        "blood": {
+            "toast 1": [0.1, 1],
+            "toast 2": [1, 1]
+        }
+    }
+}

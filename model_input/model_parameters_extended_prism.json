@@ -1,0 +1,118 @@
+{
+    "__comment__": "This file specifies easy-to-understand and user-manipulated settings about the parameters of MC model. We can use this file to make the formal configuration for MCX. Additionally, in this file, absorption coefficient, which means mua, of each tissue is not given due to WMC. And all of the length units in this file are all in [mm].",
+    
+    "OptParam":{
+        "__comment__": "The parameters of optical properties below will be used for MC modeling and are classified based on materials.",
+        "Air":{
+            "n": 1,
+            "g": 1,
+            "mus": 0
+        },
+        "PLA":{
+            "n": 1.45,
+            "g": 1,
+            "mus": 1e-4
+        },
+        "Prism":{
+            "n": 1.51,
+            "g": 1,
+            "mus": 1e-4
+        },
+        "Skin":{
+            "n": 1.4,
+            "g": 0.8,
+            "muspx": 24,
+            "bmie": 1.55
+        },    
+        "Fat":{
+            "n": 1.4,
+            "g": 0.9,
+            "muspx": 17.5,
+            "bmie": 0.69
+        },    
+        "Muscle":{
+            "n": 1.4,
+            "g": 0.9,
+            "muspx": 6.08,
+            "bmie": 1.87
+        },    
+        "IJV":{
+            "n": 1.4,
+            "g": 0.9,
+            "muspx": 5,
+            "bmie": 0.66
+        },    
+        "CCA":{
+            "n": 1.4,
+            "g": 0.9,
+            "muspx": 5,
+            "bmie": 0.66
+        }
+    },
+    
+    "GeoParam":{
+        "__comment__": "The geometry parameters below is related to tissue structure and is measured by ultrasound scanner",
+        "SkinThk": 1,
+        "FatThk": 1.5,
+        "IJVRadius": 4.5,
+        "IJVDepth": 10.5,
+        "CCARadius": 2.5,
+        "CCADepth": 16,
+        "IJVCCADist": 7
+    },
+    
+    "HardwareParam":{
+        "__comment__": "Some of parameters below will be used in {Shapes} of MCXInput template",
+        "Source": {
+            "Holder":{
+                "__comment__": "Source holder is put in the center of whole model and pasted onto the tissue surface.",
+                "XSize": 28,
+                "YSize": 28,
+                "ZSize": 5,
+                "IrraWinRadius": 2.5
+            },
+            "LED":{
+                "__comment__": "LED is put in the center of source holder. The distance from LED surface to irradiated window is represented by Surf2Win below.",
+                "XSize": 1.8,
+                "YSize": 2.55,
+                "Surf2Win": 6,
+                "SamplingNumOfRadiationPattern": 1e5
+            }
+        },
+        "Detector":{
+            "Holder":{
+                "__comment__": "Detector holder is put right next to the source holder.",
+                "XSize": 14,
+                "YSize": 15.5,
+                "ZSize": 5
+            },
+            "Prism":{
+                "__comment__": "Prism is put in the middle of detector holder and on the skin surface.",
+                "XSize": 5,
+                "YSize": 15.5,
+                "ZSize": 5
+            },
+            "Fiber": [
+                {
+                    "SDS": 16.5,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 20,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 23.5,
+                    "Radius": 0.3675
+                }
+            ]
+        }
+    },
+    
+    "ModelSize":{
+        "__comment__": "Should consider the prism leg in zSize. The sizes specified below are in [mm].",
+        "XSize": 200,
+        "YSize": 200,
+        "ZSize": 57.5
+    }
+}

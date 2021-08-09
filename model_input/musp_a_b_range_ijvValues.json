@@ -1,0 +1,46 @@
+{
+    "//comment": "The (a,b) range below is transformed from 'musp_a_b_literatureValues.json'. Actually, 'a' is changed, and 'b' keeps the same. The equation for musp calculation is --> musp = a * (wl/745)^-b, which 745nm is the reference wl of our ijv project.",
+    
+    "contents": {
+        "skin": {
+            "a": [
+                17.97223051096264,
+                30.244591133181416
+            ],
+            "b": [
+                0.7050000000000002,
+                2.4530000000000007
+            ]
+        },
+        "fatty tissue": {
+            "a": [
+                11.41380347192673,
+                23.737481008767737
+            ],
+            "b": [
+                0.38500000000000073,
+                0.9879999999999973
+            ]
+        },
+        "muscle": {
+            "a": [
+                3.183030490411129,
+                8.986133530553262
+            ],
+            "b": [
+                0.9260000000000006,
+                2.8200000000000003
+            ]
+        },
+        "blood": {
+            "a": [
+                0.06711409395973154,
+                0.6711409395973155
+            ],
+            "b": [
+                1.0,
+                1.0000000000000004
+            ]
+        }
+    }
+}

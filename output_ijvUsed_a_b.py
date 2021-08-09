@@ -10,13 +10,16 @@ Reason: Our reference_wl is different from Jacuqes's paper.
         Ours is 745nm, but Jacques's is 500nm.
 """
 
+from IPython import get_ipython
+get_ipython().magic('clear')
+get_ipython().magic('reset -f')
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import json
 plt.rcParams.update({'mathtext.default': 'regular'})
 plt.rcParams["font.family"] = "Times New Roman"
-plt.rcParams['figure.dpi'] = 200
+plt.rcParams['figure.dpi'] = 300
 
 #%% function
 ref_wl_jacques = 500
@@ -35,10 +38,10 @@ def calculate_musp_ijv(wl, a, b):
 wl = np.linspace(680, 810, num=14, dtype=int)
 
 # input path - the file of literature datas
-input_path = "input/musp_a_b_literatureValues.json"
+input_path = "model_input/musp_a_b_literatureValues.json"
 
 # output path - to save the transformed (a,b) range into a stable file
-output_path = "input/musp_a_b_range_ijvValues.json"
+output_path = "model_input/musp_a_b_range_ijvValues.json"
 
 #%% calculate and plot literature's musp, in order to find the bound in previous studies
 

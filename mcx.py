@@ -5,8 +5,14 @@ Created on Thu Jul 29 14:06:13 2021
 @author: EricSyu
 """
 
+from IPython import get_ipython
+get_ipython().magic('clear')
+get_ipython().magic('reset -f')
+import matplotlib.pyplot as plt
+plt.close("all")
 import numpy as np
 from scipy.interpolate import PchipInterpolator
+from copy import deepcopy
 import os
 import sys
 import json
@@ -25,21 +31,25 @@ class MCX:
         with open(configFile) as f:
             self.config = json.load(f)
         
-        # set photon_batch, but still not know why.
-        if self.config["photon_batch"] > self.config["num_photon"]:
-            self.config["photon_batch"] = self.config["num_photon"]
+        # set PhotonBatch, but still not know why.
+        if self.config["PhotonBatch"] > self.config["PhotonNum"]:
+            self.config["PhotonBatch"] = self.config["PhotonNum"]
         
-        # mcx_input setting
-        with open(self.config["mcx_input"]) as f:
-            self.mcx_input = json.load(f)
+        # load model_parameters
+        with open(self.config["ModelParametersPath"]) as f:
+            self.modelParameters = json.load(f)
+        
+        # load mcxInput setting template
+        with open(self.config["MCXInputPath"]) as f:
+            self.mcxInput = json.load(f)
         
         # folder path setting        
         # main-path
-        self.session = os.path.join("output", self.config["session_id"])        
+        self.session = os.path.join("output", self.config["SessionID"])        
         # sub-path
         self.plot = os.path.join(self.session, "plot")
         self.plot_mc2 = os.path.join(self.session, "plot_mc2")
-        self.research_analysis = os.path.join(self.session, "research_analysis")
+        self.post_analysis = os.path.join(self.session, "post_analysis")
         self.mcx_output = os.path.join(self.session, "mcx_output")
         self.json_output = os.path.join(self.session, "json_output")
 
@@ -55,9 +65,9 @@ class MCX:
         # sub-path for saving mc2 plot
         if not os.path.isdir(self.plot_mc2):
             os.mkdir(self.plot_mc2)
-        # sub-path for saving research analysis (analysis after simulation if needed)
-        if not os.path.isdir(self.research_analysis):
-            os.mkdir(self.research_analysis)
+        # sub-path for saving post analysis (analysis after simulation if needed)
+        if not os.path.isdir(self.post_analysis):
+            os.mkdir(self.post_analysis)
         # sub-path for saving raw simulation output
         if not os.path.isdir(self.mcx_output):
             os.mkdir(self.mcx_output)
@@ -66,34 +76,35 @@ class MCX:
             os.mkdir(self.json_output)            
 
         # main: run forward mcx
-        if self.config["type"] == "ijv":
+        if self.config["Type"] == "ijv":
             # make formal configuration of MCX
-            self.makeInput()
-            # make command and run (repeat {user-specified repeatTimes} times)
-            for i in range(self.config["repeatTimes"]):
+            self.makeMCXInput()
+            # make command and run (repeat {user-specified RepeatTimes} times)
+            for i in range(self.config["RepeatTimes"]):
                 command = self.getCommand(i)
                 sys.stdout.flush()
-                os.chdir(self.config["binary_path"])
+                os.chdir(self.config["BinaryPath"])
                 print("Current position to run MCX:\n", os.getcwd(), end="\n\n")
                 print("Command sent to MCX:\n{}".format(command), end="\n\n")
-                print("Start to run # {}".format(i), end="\n\n")
+                print("∎∎ Start to run # {} ...".format(i), end=" ")
                 os.system(command)
+                print("Finished !! ∎∎", end="\n\n")
                 os.chdir("../..")
         else:
-            raise Exception("'type' in %s is invalid!\ntry 'ijv', 'artery' or 'phantom'." % self.config["session_id"])
+            raise Exception("'Type' in %s is invalid!\ntry 'ijv', 'artery' or 'phantom'." % self.config["SessionID"])
 
 
     # Create the user-defined command line flags for mcx
     def getCommand(self, simOrder):        
-        session_name = "{}_{}".format(self.config["session_id"], simOrder)
+        session_name = "{}_{}".format(self.config["SessionID"], simOrder)
         geometry_file = os.path.abspath(os.path.join(self.json_output, "input.json"))
         
         root = "\"%s\" " % os.path.join(os.path.abspath(self.session), "mcx_output")
-        unitmm = "%f " % self.config["voxel_size"]
-        photon = "%d " % self.config["photon_batch"]
-        num_batch = "%d " % (self.config["num_photon"]//self.config["photon_batch"])
+        unitmm = "%f " % self.config["VoxelSize"]
+        photon = "%d " % self.config["PhotonBatch"]
+        num_batch = "%d " % (self.config["PhotonNum"]//self.config["PhotonBatch"])
         maxdetphoton = "10000000"
-        # maxdetphoton = "%d" % (self.config["num_photon"]//5)
+        # maxdetphoton = "%d" % (self.config["PhotonNum"]//5)
         # save_mc2 = "0 " if self.config["train"] else "1 "
         # mc2 is seldom used
 
@@ -121,11 +132,14 @@ class MCX:
         command += "--maxdetphoton {} ".format(maxdetphoton)
         command += "--srcfrom0 1 "
         command += "--savedetflag DPXVW "
-        command += "--outputtype {} ".format("X")
+        if self.config.get("DoSaveFlux"):
+            command += "--outputtype {} ".format("E")
+        else:
+            command += "--outputtype {} ".format("X")
         command += "--outputformat {} ".format("jnii")
         command += "--debug P "
         # add output .mc2 20210428 above
-        if self.config.get("replay", None):
+        if self.config.get("replay"):
             command += "--saveseed 1 "
             if self.config.get("replay_mch", None):
                 command += "--save2pt 1 "
@@ -137,152 +151,320 @@ class MCX:
                 command += "--save2pt 0 "
         else:
             command += "--saveseed 1 "
-            command += "--save2pt 0 "
+            if self.config.get("DoSaveFlux"):
+                command += "--save2pt 1 "
+            else:
+                command += "--save2pt 0 "
             command += "--seed {} ".format(randint(0, 1000000000))
             # command += "--seed {} ".format(1)
 
         return command
-    
-    def makeInput(self):
-        # set session
-        self.mcx_input["Session"]["ID"] = self.config["session_id"]
-        self.mcx_input["Session"]["Photons"] = self.config["num_photon"]
-        
-        # set optical properties of tissue model
-        wl = 745
-        # 0: Air
-        self.mcx_input["Domain"]["Media"][0]["n"] = 1
-        self.mcx_input["Domain"]["Media"][0]["g"] = 1
-        self.mcx_input["Domain"]["Media"][0]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][0]["mus"] = 0
-        # 1: Source PLA
-        self.mcx_input["Domain"]["Media"][1]["n"] = 1.45
-        self.mcx_input["Domain"]["Media"][1]["g"] = 1
-        self.mcx_input["Domain"]["Media"][1]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][1]["mus"] = 1e-4
-        # 2: Detector PLA
-        self.mcx_input["Domain"]["Media"][2]["n"] = 1.45
-        self.mcx_input["Domain"]["Media"][2]["g"] = 1
-        self.mcx_input["Domain"]["Media"][2]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][2]["mus"] = 1e-4
-        # 3: Source Air
-        self.mcx_input["Domain"]["Media"][3]["n"] = 1
-        self.mcx_input["Domain"]["Media"][3]["g"] = 1
-        self.mcx_input["Domain"]["Media"][3]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][3]["mus"] = 0
-        # 4: Detector Prism
-        self.mcx_input["Domain"]["Media"][4]["n"] = 1.51
-        self.mcx_input["Domain"]["Media"][4]["g"] = 1
-        self.mcx_input["Domain"]["Media"][4]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][4]["mus"] = 1e-4
-        # 5: Skin
-        self.mcx_input["Domain"]["Media"][5]["n"] = 1.42
-        self.mcx_input["Domain"]["Media"][5]["g"] = 0.9
-        self.mcx_input["Domain"]["Media"][5]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][5]["mus"] = \
-            self.calculateMus(wl, musp745=24, bmie=1.6, 
-                              g=self.mcx_input["Domain"]["Media"][5]["g"])
-        # 6: Fat
-        self.mcx_input["Domain"]["Media"][6]["n"] = 1.4
-        self.mcx_input["Domain"]["Media"][6]["g"] = 0.9
-        self.mcx_input["Domain"]["Media"][6]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][6]["mus"] = \
-            self.calculateMus(wl, musp745=17, bmie=0.7, 
-                              g=self.mcx_input["Domain"]["Media"][6]["g"])
-        # 7: Muscle
-        self.mcx_input["Domain"]["Media"][7]["n"] = 1.4
-        self.mcx_input["Domain"]["Media"][7]["g"] = 0.9
-        self.mcx_input["Domain"]["Media"][7]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][7]["mus"] = \
-            self.calculateMus(wl, musp745=6, bmie=1.9, 
-                              g=self.mcx_input["Domain"]["Media"][7]["g"])
-        # 8: IJV
-        self.mcx_input["Domain"]["Media"][8]["n"] = 1.4
-        self.mcx_input["Domain"]["Media"][8]["g"] = 0.99
-        self.mcx_input["Domain"]["Media"][8]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][8]["mus"] = 100
-        # 9: CCA
-        self.mcx_input["Domain"]["Media"][9]["n"] = 1.4
-        self.mcx_input["Domain"]["Media"][9]["g"] = 0.99
-        self.mcx_input["Domain"]["Media"][9]["mua"] = 0
-        self.mcx_input["Domain"]["Media"][9]["mus"] = 100
-        
-        # set light source of tissue model
-        # sampling angles based on the radiation pattern distribution
-        sampling_num = 100000
-        
-        LED_profile_in3D = np.genfromtxt(self.config["sourcePattern_path"], delimiter=",")
-        angle = LED_profile_in3D[:, 0]
-        cdf = np.cumsum(LED_profile_in3D[:, 1])
-        inverse_cdf = PchipInterpolator(cdf, angle)
-        
-        samplingSeeds = np.linspace(0, 1, num=sampling_num)
-        samplingAngles = inverse_cdf(samplingSeeds)
-        
-        # write the sampling angle array into mcx_input
-        self.mcx_input["Optode"]["Source"]["Type"] = "anglepattern"
-        self.mcx_input["Optode"]["Source"]["Pos"] = [self.mcx_input["Domain"]["Dim"][0] / 2,
-                                                     self.mcx_input["Domain"]["Dim"][1] / 2, 
-                                                     20-0.00001]
-        
-        # Set the source-related parameters !!!
-        self.mcx_input["Optode"]["Source"]["Param1"] = [sampling_num, 10.2, 7.2, 0]
-        self.mcx_input["Optode"]["Source"]["Param2"] = [self.mcx_input["Domain"]["Dim"][0], 
-                                                        self.mcx_input["Domain"]["Dim"][1], 
-                                                        0, 
-                                                        24]
-        self.mcx_input["Optode"]["Source"]["Pattern"] = {}
-        self.mcx_input["Optode"]["Source"]["Pattern"]["Nx"] = sampling_num
-        self.mcx_input["Optode"]["Source"]["Pattern"]["Ny"] = 1
-        self.mcx_input["Optode"]["Source"]["Pattern"]["Nz"] = 1
-        self.mcx_input["Optode"]["Source"]["Pattern"]["Data"] = np.deg2rad(samplingAngles).tolist()        
-        
-        with open(os.path.join(self.json_output, "input.json"), 'w') as f:
-            json.dump(self.mcx_input, f, indent=4)
 
+
+    def makeMCXInput(self):
+        # set Session
+        self.mcxInput["Session"]["ID"] = self.config["SessionID"]
+        
+        # set Domain Media (optical properties of tissue model)
+        wl = 745
+        self.setDomainMedia(wl)        
+        
+        # set Domain Dim
+        self.mcxInput["Domain"]["Dim"] = [int(self.convertUnit(self.modelParameters["ModelSize"]["XSize"])),
+                                          int(self.convertUnit(self.modelParameters["ModelSize"]["YSize"])),
+                                          int(self.convertUnit(self.modelParameters["ModelSize"]["ZSize"]))
+                                          ]
+        
+        # set Domain OriginType
+        self.mcxInput["Domain"]["OriginType"] = 1
+        
+        # set Shapes
+        self.setShapes()
+        
+        # set Optodes
+        self.setOptodes()
+        
+        # save mcxInput to output/json_output
+        with open(os.path.join(self.json_output, "input.json"), 'w') as f:
+            json.dump(self.mcxInput, f, indent=4)
+
+
+    def setDomainMedia(self, wl):
+        # 0: Air
+        self.mcxInput["Domain"]["Media"][0]["n"] = self.modelParameters["OptParam"]["Air"]["n"]
+        self.mcxInput["Domain"]["Media"][0]["g"] = self.modelParameters["OptParam"]["Air"]["g"]
+        self.mcxInput["Domain"]["Media"][0]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][0]["mus"] = self.modelParameters["OptParam"]["Air"]["mus"]
+        # 1: Source PLA
+        self.mcxInput["Domain"]["Media"][1]["n"] = self.modelParameters["OptParam"]["PLA"]["n"]
+        self.mcxInput["Domain"]["Media"][1]["g"] = self.modelParameters["OptParam"]["PLA"]["g"]
+        self.mcxInput["Domain"]["Media"][1]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][1]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]
+        # 2: Detector PLA
+        self.mcxInput["Domain"]["Media"][2]["n"] = self.modelParameters["OptParam"]["PLA"]["mus"]
+        self.mcxInput["Domain"]["Media"][2]["g"] = self.modelParameters["OptParam"]["PLA"]["g"]
+        self.mcxInput["Domain"]["Media"][2]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][2]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]
+        # 3: Source Air
+        self.mcxInput["Domain"]["Media"][3]["n"] = self.modelParameters["OptParam"]["Air"]["n"]
+        self.mcxInput["Domain"]["Media"][3]["g"] = self.modelParameters["OptParam"]["Air"]["g"]
+        self.mcxInput["Domain"]["Media"][3]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][3]["mus"] = self.modelParameters["OptParam"]["Air"]["mus"]
+        # 4: Detector Prism
+        self.mcxInput["Domain"]["Media"][4]["n"] = self.modelParameters["OptParam"]["Prism"]["n"]
+        self.mcxInput["Domain"]["Media"][4]["g"] = self.modelParameters["OptParam"]["Prism"]["g"]
+        self.mcxInput["Domain"]["Media"][4]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][4]["mus"] = self.modelParameters["OptParam"]["Prism"]["mus"]
+        # 5: Skin
+        self.mcxInput["Domain"]["Media"][5]["n"] = self.modelParameters["OptParam"]["Skin"]["n"]
+        self.mcxInput["Domain"]["Media"][5]["g"] = self.modelParameters["OptParam"]["Skin"]["g"]
+        if self.config.get("DoSaveFlux"):
+            self.mcxInput["Domain"]["Media"][5]["mua"] = 4e4
+            self.mcxInput["Domain"]["Media"][5]["mus"] = 1e-4
+        else:
+            self.mcxInput["Domain"]["Media"][5]["mua"] = 0
+            self.mcxInput["Domain"]["Media"][5]["mus"] = \
+                self.calculateMus(wl, 
+                                  musp745=self.modelParameters["OptParam"]["Skin"]["muspx"], 
+                                  bmie=self.modelParameters["OptParam"]["Skin"]["bmie"], 
+                                  g=self.modelParameters["OptParam"]["Skin"]["g"])
+        # 6: Fat
+        self.mcxInput["Domain"]["Media"][6]["n"] = self.modelParameters["OptParam"]["Fat"]["n"]
+        self.mcxInput["Domain"]["Media"][6]["g"] = self.modelParameters["OptParam"]["Fat"]["g"]
+        self.mcxInput["Domain"]["Media"][6]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][6]["mus"] = \
+            self.calculateMus(wl, 
+                              musp745=self.modelParameters["OptParam"]["Fat"]["muspx"], 
+                              bmie=self.modelParameters["OptParam"]["Fat"]["bmie"], 
+                              g=self.modelParameters["OptParam"]["Fat"]["g"])
+        # 7: Muscle
+        self.mcxInput["Domain"]["Media"][7]["n"] = self.modelParameters["OptParam"]["Muscle"]["n"]
+        self.mcxInput["Domain"]["Media"][7]["g"] = self.modelParameters["OptParam"]["Muscle"]["g"]
+        self.mcxInput["Domain"]["Media"][7]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][7]["mus"] = \
+            self.calculateMus(wl, 
+                              musp745=self.modelParameters["OptParam"]["Muscle"]["muspx"], 
+                              bmie=self.modelParameters["OptParam"]["Muscle"]["bmie"], 
+                              g=self.modelParameters["OptParam"]["Muscle"]["g"])
+        # 8: IJV
+        self.mcxInput["Domain"]["Media"][8]["n"] = self.modelParameters["OptParam"]["IJV"]["n"]
+        self.mcxInput["Domain"]["Media"][8]["g"] = self.modelParameters["OptParam"]["IJV"]["g"]
+        self.mcxInput["Domain"]["Media"][8]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][8]["mus"] = 100
+        # 9: CCA
+        self.mcxInput["Domain"]["Media"][9]["n"] = self.modelParameters["OptParam"]["CCA"]["n"]
+        self.mcxInput["Domain"]["Media"][9]["g"] = self.modelParameters["OptParam"]["CCA"]["g"]
+        self.mcxInput["Domain"]["Media"][9]["mua"] = 0
+        self.mcxInput["Domain"]["Media"][9]["mus"] = 100
+
+    
+    def setShapes(self):
+        # 0: Air
+        self.mcxInput["Shapes"][0]["Grid"]["Size"] = self.mcxInput["Domain"]["Dim"]        
+        # 1: Source PLA
+        self.mcxInput["Shapes"][1]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["XSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["YSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["ZSize"]))
+                                                         ]
+        self.mcxInput["Shapes"][1]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
+                                                      - int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][0]/2),
+                                                      int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2) 
+                                                      - int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][1]/2),
+                                                      0
+                                                      ]
+        # 2: Detector PLA
+        self.mcxInput["Shapes"][2]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["XSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["YSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["ZSize"]))
+                                                         ]
+        self.mcxInput["Shapes"][2]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
+                                                      - int(self.mcxInput["Shapes"][2]["Subgrid"]["Size"][0]/2),
+                                                      int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2) 
+                                                      + int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][1]/2),
+                                                      0
+                                                      ]
+        # 3: Source Air
+        self.mcxInput["Shapes"][3]["Cylinder"]["C0"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
+                                                        int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2),
+                                                        0
+                                                        ]
+        self.mcxInput["Shapes"][3]["Cylinder"]["C1"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
+                                                        int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2),
+                                                        self.mcxInput["Shapes"][1]["Subgrid"]["Size"][2]
+                                                        ]
+        self.mcxInput["Shapes"][3]["Cylinder"]["R"] = int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["IrraWinRadius"]))
+        # 4: Detector Prism
+        self.mcxInput["Shapes"][4]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["XSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["YSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["ZSize"]))
+                                                         ]
+        # self.mcxInput["Shapes"][4]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
+        #                                               - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][0]/2),
+        #                                               int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2) 
+        #                                               + int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][1]/2) 
+        #                                               + int(self.mcxInput["Shapes"][2]["Subgrid"]["Size"][1]/2) 
+        #                                               - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][1]/2),
+        #                                               0
+        #                                               ]
+        if len(self.modelParameters["HardwareParam"]["Detector"]["Fiber"]) <= 1:
+            self.mcxInput["Shapes"][4]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2)
+                                                          - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][0]/2),
+                                                          int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2)
+                                                          + int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Fiber"][0]["SDS"]))
+                                                          - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][1]/2),
+                                                          0
+                                                          ]
+        else:
+            self.mcxInput["Shapes"][4]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
+                                                          - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][0]/2),
+                                                          int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2)
+                                                          + int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][1]/2),
+                                                          0
+                                                          ]
+        # 5: Skin
+        self.mcxInput["Shapes"][5]["Subgrid"]["Size"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0],
+                                                         self.mcxInput["Shapes"][0]["Grid"]["Size"][1],
+                                                         int(self.convertUnit(self.modelParameters["GeoParam"]["SkinThk"]))
+                                                         ]
+        self.mcxInput["Shapes"][5]["Subgrid"]["O"] = [0,
+                                                      0,
+                                                      self.mcxInput["Shapes"][4]["Subgrid"]["Size"][2]
+                                                      ]
+        # 6: Fat
+        self.mcxInput["Shapes"][6]["Subgrid"]["Size"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0],
+                                                         self.mcxInput["Shapes"][0]["Grid"]["Size"][1],
+                                                         int(self.convertUnit(self.modelParameters["GeoParam"]["FatThk"]))
+                                                         ]
+        self.mcxInput["Shapes"][6]["Subgrid"]["O"] = [0,
+                                                      0,
+                                                      self.mcxInput["Shapes"][5]["Subgrid"]["O"][2] 
+                                                      + self.mcxInput["Shapes"][5]["Subgrid"]["Size"][2]
+                                                      ]
+        # 7: Muscle (Reverse the setting order of "Size" and "Order".)
+        self.mcxInput["Shapes"][7]["Subgrid"]["O"] = [0,
+                                                      0,
+                                                      self.mcxInput["Shapes"][6]["Subgrid"]["O"][2] 
+                                                      + self.mcxInput["Shapes"][6]["Subgrid"]["Size"][2]
+                                                      ]
+        self.mcxInput["Shapes"][7]["Subgrid"]["Size"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0],
+                                                         self.mcxInput["Shapes"][0]["Grid"]["Size"][1],
+                                                         self.mcxInput["Shapes"][0]["Grid"]["Size"][2] 
+                                                         - self.mcxInput["Shapes"][7]["Subgrid"]["O"][2]
+                                                         ]        
+        # 8: IJV
+        self.mcxInput["Shapes"][8]["Cylinder"]["C0"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
+                                                        0,
+                                                        self.convertUnit(self.modelParameters["GeoParam"]["IJVDepth"]) 
+                                                        + self.mcxInput["Shapes"][5]["Subgrid"]["O"][2]
+                                                        ]
+        self.mcxInput["Shapes"][8]["Cylinder"]["C1"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
+                                                        self.mcxInput["Shapes"][0]["Grid"]["Size"][1],
+                                                        self.mcxInput["Shapes"][8]["Cylinder"]["C0"][2]
+                                                        ]
+        self.mcxInput["Shapes"][8]["Cylinder"]["R"] = self.convertUnit(self.modelParameters["GeoParam"]["IJVRadius"])
+        # 9: CCA
+        ccax = self.mcxInput["Shapes"][8]["Cylinder"]["C0"][0] - self.convertUnit(np.sqrt(self.modelParameters["GeoParam"]["IJVCCADist"]**2 
+                                                                                          - (self.modelParameters["GeoParam"]["CCADepth"] - self.modelParameters["GeoParam"]["IJVDepth"])**2
+                                                                                          )
+                                                                                  )
+        self.mcxInput["Shapes"][9]["Cylinder"]["C0"] = [ccax,
+                                                        0,
+                                                        self.convertUnit(self.modelParameters["GeoParam"]["CCADepth"]) 
+                                                        + self.mcxInput["Shapes"][5]["Subgrid"]["O"][2]
+                                                        ]
+        self.mcxInput["Shapes"][9]["Cylinder"]["C1"] = [ccax,
+                                                        self.mcxInput["Shapes"][0]["Grid"]["Size"][1],
+                                                        self.mcxInput["Shapes"][9]["Cylinder"]["C0"][2]
+                                                        ]
+        self.mcxInput["Shapes"][9]["Cylinder"]["R"] = self.convertUnit(self.modelParameters["GeoParam"]["CCARadius"])
+
+
+    def setOptodes(self):
+        # detector
+        for fiber in self.modelParameters["HardwareParam"]["Detector"]["Fiber"]:
+            self.mcxInput["Optode"]["Detector"].append({"R": self.convertUnit(fiber["Radius"]),
+                                                        "Pos": [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2,
+                                                                self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
+                                                                + self.convertUnit(fiber["SDS"]),
+                                                                0
+                                                                ]
+                                                        })
+        # self.mcxInput["Optode"]["Detector"][0]["R"] = self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Fiber1"]["Radius"])
+        # self.mcxInput["Optode"]["Detector"][0]["Pos"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2,
+        #                                                  self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
+        #                                                  + self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Fiber1"]["SDS"]),
+        #                                                  0
+        #                                                  ]
+        # source
+        # sampling angles based on the radiation pattern distribution
+        ledProfileIn3D = np.genfromtxt(self.config["SourcePatternPath"], delimiter=",")
+        angle = ledProfileIn3D[:, 0]
+        cdf = np.cumsum(ledProfileIn3D[:, 1])
+        inversecdf = PchipInterpolator(cdf, angle)        
+        samplingSeeds = np.linspace(0, 1, num=int(self.modelParameters["HardwareParam"]["Source"]["LED"]["SamplingNumOfRadiationPattern"]))
+        samplingAngles = inversecdf(samplingSeeds)        
+        # set source position
+        self.mcxInput["Optode"]["Source"]["Pos"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2,
+                                                    self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2,
+                                                    self.mcxInput["Shapes"][5]["Subgrid"]["O"][2]-1e-6
+                                                    ]
+        # save mcxInput to output/json_output (this file is for preview, not for simulation)
+        self.mcxInputForPreview = deepcopy(self.mcxInput)
+        self.mcxInputForPreview["Optode"]["Source"]["Type"] = "pencil"
+        del self.mcxInputForPreview["Domain"]["Media"][6:]
+        del self.mcxInputForPreview["Shapes"][6:]
+        with open(os.path.join(self.json_output, "input_for_mcxpreview.json"), 'w') as f:
+            json.dump(self.mcxInputForPreview, f, indent=4)
+        # set source type
+        self.mcxInput["Optode"]["Source"]["Type"] = "anglepattern"
+        # set additional parameters about led arrangement (please refer to the hackMD-ijvNotebooks records on 2021/04/09)
+        self.mcxInput["Optode"]["Source"]["Param1"] = [int(self.modelParameters["HardwareParam"]["Source"]["LED"]["SamplingNumOfRadiationPattern"]), 
+                                                       self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["LED"]["XSize"]), 
+                                                       self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["LED"]["YSize"]), 
+                                                       0
+                                                       ]
+        self.mcxInput["Optode"]["Source"]["Param2"] = [0, 
+                                                       0, 
+                                                       self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["IrraWinRadius"]), 
+                                                       self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["LED"]["Surf2Win"])
+                                                       ]
+        # set formal pattern
+        self.mcxInput["Optode"]["Source"]["Pattern"] = {}
+        self.mcxInput["Optode"]["Source"]["Pattern"]["Nx"] = int(self.modelParameters["HardwareParam"]["Source"]["LED"]["SamplingNumOfRadiationPattern"])
+        self.mcxInput["Optode"]["Source"]["Pattern"]["Ny"] = 1
+        self.mcxInput["Optode"]["Source"]["Pattern"]["Nz"] = 1
+        self.mcxInput["Optode"]["Source"]["Pattern"]["Data"] = np.deg2rad(samplingAngles).tolist()
+    
 
     def calculateMus(self, wl, musp745, bmie, g):        
         musp = musp745 * (wl/745) ** (-bmie)
-        mus = musp/(1-g) * 0.1
+        mus = musp/(1-g) * 0.1  # *0.1 means unit convertion from 1/cm to 1/mm
         return mus
+    
+    
+    def convertUnit(self, length):
+        """
+        Do unit conversion.
 
+        Parameters
+        ----------
+        length : int or float
+            The unit of length is [mm].
 
+        Returns
+        -------
+        numGrid : int or float
+            Number of grid, for MCX simulation.
+
+        """
+        numGrid = length / self.config["VoxelSize"]
+        return numGrid
+
+# %% Run
 if __name__ == "__main__":
-    import jdata as jd
-    import matplotlib.pyplot as plt
-    plt.rcParams.update({"mathtext.default": "regular"})
-    plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["figure.dpi"] = 300
-    
     # config file place
-    config = "configs/single_detector.json"
-    
-    # start
+    config = "configs/config_extended_prism.json"    
+    # initialize
     mcx = MCX(config)
-    
     # run forward mcx
     mcx.run()
-    
-    #%% plot energy density matrix
-    pt = jd.load('output/ijv/mcx_output/ijv.jnii')
-    densityData = pt["NIFTIData"]
-    gridStep = 5
-    mcx_gridSize = mcx.config["voxel_size"]    
-    
-    surfaceDensity = densityData[:, :, 0]    
-    norm = surfaceDensity / surfaceDensity.max()
-    plt.imshow(norm.T, cmap="jet") # Normalization !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 20210527
-    cbar = plt.colorbar()
-    cbar.set_label("Energy density [J/mm^3]", rotation=-90, labelpad=15)
-    plt.yticks(np.arange(-0.5, surfaceDensity.shape[1]-0.5+0.001, step=gridStep), 
-               np.arange(0, surfaceDensity.shape[1]*mcx_gridSize+0.001, step=gridStep*mcx_gridSize), 
-               fontsize="x-small")
-    plt.ylabel("Y [mm]")
-    plt.xticks(np.arange(-0.5, surfaceDensity.shape[0]-0.5+0.001, step=gridStep), 
-               np.arange(0, surfaceDensity.shape[0]*mcx_gridSize+0.001, step=gridStep*mcx_gridSize),
-               rotation=-90, 
-               fontsize="x-small")
-    plt.xlabel("X [mm]")
-    plt.grid(color='w', linestyle='-', linewidth=0.5)
-    plt.title("Surface density _ Outer (first layer of grids)")
-    plt.show()

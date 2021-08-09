@@ -236,14 +236,6 @@
     },
     "Optode": {
         "Detector": [
-            {
-                "R": 1.47,
-                "Pos": [
-                    400,
-                    480,
-                    0
-                ]
-            }
         ],
         "Source": {
             "Type": "pencil",
@@ -267,7 +259,6 @@
     },
     "Session": {
         "DoNormalize": 1,
-        "Photons": 2000000.0,
-        "ID": "IJVTissueTest"
+        "ID": "ijv_project_template"
     }
 }
