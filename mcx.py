@@ -473,7 +473,7 @@ class MCX:
 # %% Run
 if __name__ == "__main__":
     # config file place
-    config = "configs/config_normal_prisim_sds_16.5.json"
+    config = "configs/config_normal_prism_sds_16.5.json"
     # initialize
     mcx = MCX(config)
     # run forward mcx
