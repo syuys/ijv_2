@@ -35,6 +35,9 @@ class MCX:
         if self.config["PhotonBatch"] > self.config["PhotonNum"]:
             self.config["PhotonBatch"] = self.config["PhotonNum"]
         
+        # set simulated wavelength
+        self.wl = 745
+        
         # load model_parameters
         with open(self.config["ModelParametersPath"]) as f:
             self.modelParameters = json.load(f)
@@ -97,7 +100,7 @@ class MCX:
     # Create the user-defined command line flags for mcx
     def getCommand(self, simOrder):        
         session_name = "{}_{}".format(self.config["SessionID"], simOrder)
-        geometry_file = os.path.abspath(os.path.join(self.json_output, "input.json"))
+        geometry_file = os.path.abspath(os.path.join(self.json_output, "input_{}.json".format(self.wl)))
         
         root = "\"%s\" " % os.path.join(os.path.abspath(self.session), "mcx_output")
         unitmm = "%f " % self.config["VoxelSize"]
@@ -166,8 +169,7 @@ class MCX:
         self.mcxInput["Session"]["ID"] = self.config["SessionID"]
         
         # set Domain Media (optical properties of tissue model)
-        wl = 745
-        self.setDomainMedia(wl)        
+        self.setDomainMedia(self.wl)        
         
         # set Domain Dim
         self.mcxInput["Domain"]["Dim"] = [int(self.convertUnit(self.modelParameters["ModelSize"]["XSize"])),
@@ -185,7 +187,7 @@ class MCX:
         self.setOptodes()
         
         # save mcxInput to output/json_output
-        with open(os.path.join(self.json_output, "input.json"), 'w') as f:
+        with open(os.path.join(self.json_output, "input_{}.json".format(self.wl)), 'w') as f:
             json.dump(self.mcxInput, f, indent=4)
 
 
@@ -201,7 +203,7 @@ class MCX:
         self.mcxInput["Domain"]["Media"][1]["mua"] = 0
         self.mcxInput["Domain"]["Media"][1]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]
         # 2: Detector PLA
-        self.mcxInput["Domain"]["Media"][2]["n"] = self.modelParameters["OptParam"]["PLA"]["mus"]
+        self.mcxInput["Domain"]["Media"][2]["n"] = self.modelParameters["OptParam"]["PLA"]["n"]
         self.mcxInput["Domain"]["Media"][2]["g"] = self.modelParameters["OptParam"]["PLA"]["g"]
         self.mcxInput["Domain"]["Media"][2]["mua"] = 0
         self.mcxInput["Domain"]["Media"][2]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]
@@ -250,12 +252,20 @@ class MCX:
         self.mcxInput["Domain"]["Media"][8]["n"] = self.modelParameters["OptParam"]["IJV"]["n"]
         self.mcxInput["Domain"]["Media"][8]["g"] = self.modelParameters["OptParam"]["IJV"]["g"]
         self.mcxInput["Domain"]["Media"][8]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][8]["mus"] = 100
+        self.mcxInput["Domain"]["Media"][8]["mus"] = \
+            self.calculateMus(wl, 
+                              musp745=self.modelParameters["OptParam"]["IJV"]["muspx"], 
+                              bmie=self.modelParameters["OptParam"]["IJV"]["bmie"], 
+                              g=self.modelParameters["OptParam"]["IJV"]["g"])
         # 9: CCA
         self.mcxInput["Domain"]["Media"][9]["n"] = self.modelParameters["OptParam"]["CCA"]["n"]
         self.mcxInput["Domain"]["Media"][9]["g"] = self.modelParameters["OptParam"]["CCA"]["g"]
         self.mcxInput["Domain"]["Media"][9]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][9]["mus"] = 100
+        self.mcxInput["Domain"]["Media"][9]["mus"] = \
+            self.calculateMus(wl, 
+                              musp745=self.modelParameters["OptParam"]["CCA"]["muspx"], 
+                              bmie=self.modelParameters["OptParam"]["CCA"]["bmie"], 
+                              g=self.modelParameters["OptParam"]["CCA"]["g"])
 
     
     def setShapes(self):
@@ -402,7 +412,7 @@ class MCX:
         cdf = np.cumsum(ledProfileIn3D[:, 1])
         inversecdf = PchipInterpolator(cdf, angle)        
         samplingSeeds = np.linspace(0, 1, num=int(self.modelParameters["HardwareParam"]["Source"]["LED"]["SamplingNumOfRadiationPattern"]))
-        samplingAngles = inversecdf(samplingSeeds)        
+        samplingAngles = inversecdf(samplingSeeds)
         # set source position
         self.mcxInput["Optode"]["Source"]["Pos"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2,
                                                     self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2,
