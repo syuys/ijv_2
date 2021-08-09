@@ -3,9 +3,9 @@
     "SessionID": "normal_prisim_sds_20",
     "Type": "ijv",
 
-    "PhotonNum": 2e6,
+    "PhotonNum": 2.5e9,
     "PhotonBatch": 5e9,
-    "RepeatTimes": 1,
+    "RepeatTimes": 10,
     "VoxelSize": 0.25,
 
     "SourcePatternPath": "model_input/LED_profile_in3D_pfForm_0to89.csv",
