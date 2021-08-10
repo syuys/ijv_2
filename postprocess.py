@@ -79,5 +79,63 @@ def plotIntstDistrb(sessionID):
     plt.show()
 
 
+def analyzeReflectance(sessionID):    
+    # parameters
+    na = 0.22
+    nAir = 1
+    nPrism = 1.51
+    with open(os.path.join("output", sessionID, "json_output", "input_745.json")) as f:
+        mcxInput = json.load(f)
+    detNum = len(mcxInput["Optode"]["Detector"])
+    
+    detOutputPathSet = glob(os.path.join("output", sessionID, "mcx_output", "*.jdat"))
+    
+    # analyze detected photon
+    reflectance = np.empty((len(detOutputPathSet), detNum))
+    for detOutputIdx, detOutputPath in enumerate(detOutputPathSet):
+        # read detected data
+        detOutput = jd.load(detOutputPath)
+        info = detOutput["MCXData"]["Info"]
+        photonData = detOutput["MCXData"]["PhotonData"]
+        
+        # retrieve valid detector ID and valid ppath
+        critAng = np.arcsin(na/nPrism)
+        afterRefractAng = np.arccos(abs(photonData["v"][:, 2]))
+        beforeRefractAng = np.arcsin(nAir*np.sin(afterRefractAng)/nPrism)
+        validPhotonBool = beforeRefractAng <= critAng
+        validDetID = photonData["detid"][validPhotonBool]
+        validDetID = validDetID - 1  # make detid start from 0
+        validPPath = photonData["ppath"][validPhotonBool]
+        
+        # calculate reflectance
+        mua = np.array([0.25,  # skin
+                        0.1,   # fat
+                        0.05,  # muscle
+                        0.4,   # IJV
+                        0.3    # CCA
+                        ])
+        validPPath = validPPath[:, 4:]  # retreive the pathlength of skin, fat, muscle, ijv, cca
+        
+        for detectorIdx in range(info["DetNum"]):
+            usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
+            # I = I0 * exp(-mua*L)
+            reflectance[detOutputIdx][detectorIdx] = np.exp(-np.matmul(usedValidPPath, mua)).sum() / info["TotalPhoton"]
+            
+    groupingNum = reflectance.shape[0] / 10  # 10 is the cv calculation base
+    # grouping reflectance
+    reflectance = reflectance.reshape(groupingNum, 10, detNum)  # 10 is the cv calculation base
+    # compress reflectance and calculate mean of grouping
+    reflectance = reflectance.mean(axis=0)
+    # calculate real mean and cv for 10 times
+    reflectanceMean = reflectance.mean(axis=0)
+    reflectanceCV = reflectance.std(axis=0, ddof=1) / reflectanceMean
+    
+    return reflectance, reflectanceMean, reflectanceCV, info["TotalPhoton"], groupingNum
+
+
 if __name__ == "__main__":
     plotIntstDistrb(sessionID="single_detector")
+    
+    
+    
+    

@@ -324,7 +324,7 @@ class MCX:
                                                           - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][1]/2),
                                                           0
                                                           ]
-        else:
+        else:  # for simulating lots of sds at the same time
             self.mcxInput["Shapes"][4]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
                                                           - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][0]/2),
                                                           int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2)
