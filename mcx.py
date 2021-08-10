@@ -8,10 +8,12 @@ Created on Thu Jul 29 14:06:13 2021
 from IPython import get_ipython
 get_ipython().magic('clear')
 get_ipython().magic('reset -f')
+import postprocess
 import matplotlib.pyplot as plt
 plt.close("all")
 import numpy as np
 from scipy.interpolate import PchipInterpolator
+from glob import glob
 from copy import deepcopy
 import os
 import sys
@@ -23,6 +25,9 @@ class MCX:
     # Initialize and call loadConfig()
     def __init__(self, configFile):
         self.loadConfig(configFile)
+        self.makeFolder()
+        # make formal configuration of MCX
+        self.makeMCXInput()
 
 
     # Load configuration
@@ -57,8 +62,7 @@ class MCX:
         self.json_output = os.path.join(self.session, "json_output")
 
 
-    # Main function to run simulation by passing formal configuration to MCX bin.
-    def run(self):
+    def makeFolder(self):
         # main-path for this simulation session
         if not os.path.isdir(self.session):
             os.mkdir(self.session)
@@ -76,14 +80,16 @@ class MCX:
             os.mkdir(self.mcx_output)
         # sub-path for saving MCX-used configuration
         if not os.path.isdir(self.json_output):
-            os.mkdir(self.json_output)            
+            os.mkdir(self.json_output) 
+    
 
+    # Main function to run simulation by passing formal configuration to MCX bin.
+    def run(self):
         # main: run forward mcx
         if self.config["Type"] == "ijv":
-            # make formal configuration of MCX
-            self.makeMCXInput()
+            existedOutputNum = len(glob(os.path.join(self.mcx_output, "*.jdat")))
             # make command and run (repeat {user-specified RepeatTimes} times)
-            for i in range(self.config["RepeatTimes"]):
+            for i in range(existedOutputNum, existedOutputNum+self.config["RepeatTimes"]):
                 command = self.getCommand(i)
                 sys.stdout.flush()
                 os.chdir(self.config["BinaryPath"])
@@ -472,18 +478,22 @@ class MCX:
 
 # %% Run
 if __name__ == "__main__":
-    # config file place
-    config = "configs/config_normal_prism_sds_16.5.json"
-    # initialize
-    mcx = MCX(config)
-    # run forward mcx
-    mcx.run()
+    # parameters
+    sessionID = "extended_prism"
+    config = "configs/config_{}.json".format(sessionID)
+    cvThold = 0.05
     
-    del mcx
+    # calculate reflectance first
+    reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
+    print("Session name: {} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
     
-    # config file place
-    config = "configs/config_extended_prism.json"
     # initialize
-    mcx = MCX(config)
-    # run forward mcx
-    mcx.run()
+    simulator = MCX(config)
+    
+    # run
+    while(reflectanceCV.min() > cvThold):
+        # run forward mcx
+        simulator.run()
+        # check cv and print info
+        reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
+        print("Session name: {} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceCV, totalPhoton*groupingNum), end="\n\n")

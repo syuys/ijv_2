@@ -6,9 +6,6 @@ Created on Fri Aug  6 17:24:45 2021
 @author: md703
 """
 
-from IPython import get_ipython
-get_ipython().magic('clear')
-get_ipython().magic('reset -f')
 import numpy as np
 import matplotlib.pyplot as plt
 plt.close("all")
@@ -121,7 +118,7 @@ def analyzeReflectance(sessionID):
             # I = I0 * exp(-mua*L)
             reflectance[detOutputIdx][detectorIdx] = np.exp(-np.matmul(usedValidPPath, mua)).sum() / info["TotalPhoton"]
             
-    groupingNum = reflectance.shape[0] / 10  # 10 is the cv calculation base
+    groupingNum = int(reflectance.shape[0] / 10)  # 10 is the cv calculation base
     # grouping reflectance
     reflectance = reflectance.reshape(groupingNum, 10, detNum)  # 10 is the cv calculation base
     # compress reflectance and calculate mean of grouping
