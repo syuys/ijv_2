@@ -532,4 +532,4 @@ if __name__ == "__main__":
         simulator.run()
         # check cv and print info
         reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
-        print("Session name: {} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
+        print("Session name: {} \nReflectance mean: {:.5e} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceMean, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
