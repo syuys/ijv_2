@@ -14,7 +14,6 @@ plt.close("all")
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 from glob import glob
-from copy import deepcopy
 import os
 import sys
 import json
@@ -28,6 +27,8 @@ class MCX:
         self.makeFolder()
         # make formal configuration of MCX
         self.makeMCXInput()
+        # make informal configuration of MCX for preview
+        self.makeMCXInputForPreview()
 
 
     # Load configuration
@@ -88,8 +89,9 @@ class MCX:
         # main: run forward mcx
         if self.config["Type"] == "ijv":
             existedOutputNum = len(glob(os.path.join(self.mcx_output, "*.jdat")))
-            # make command and run (repeat {user-specified RepeatTimes} times)
-            for i in range(existedOutputNum, existedOutputNum+self.config["RepeatTimes"]):
+            needAddOutputNum = self.config["RepeatTimes"] - existedOutputNum % self.config["RepeatTimes"]
+            # make command and run (based on existed number and need-add number)
+            for i in range(existedOutputNum, existedOutputNum+needAddOutputNum):
                 command = self.getCommand(i)
                 sys.stdout.flush()
                 os.chdir(self.config["BinaryPath"])
@@ -194,6 +196,47 @@ class MCX:
         
         # save mcxInput to output/json_output
         with open(os.path.join(self.json_output, "input_{}.json".format(self.wl)), 'w') as f:
+            json.dump(self.mcxInput, f, indent=4)
+    
+    
+    def makeMCXInputForPreview(self):
+        # Save mcxInput to output/json_output (these 2 files are for preview, not for simulation)
+        # Need not set Session, Domain Media and Domain OriginType here. Just need to reset Shapes, Optodes for preview use.        
+        
+        # set Domain Dim for previewing whole model (Zoom out the dimension, ex: make the model only 80mm * 80mm * 25mm)
+        fiberNum = len(self.modelParameters["HardwareParam"]["Detector"]["Fiber"])
+        sds = self.modelParameters["HardwareParam"]["Detector"]["Fiber"][fiberNum//2]["SDS"]
+        self.mcxInput["Domain"]["Dim"] = [int(self.convertUnit(sds*4)),
+                                          int(self.convertUnit(sds*4)),
+                                          int(self.convertUnit(self.modelParameters["GeoParam"]["CCADepth"]*2
+                                                               + self.modelParameters["HardwareParam"]["Source"]["Holder"]["ZSize"]
+                                                               )
+                                              )
+                                          ]        
+        # set Shapes
+        self.setShapes()        
+        # set Optodes
+        self.mcxInput["Optode"]["Detector"] = []  # initialize detector list fist
+        self.setOptodes()        
+        # change the source type because mcxpreview did not support "anglepattern"
+        self.mcxInput["Optode"]["Source"]["Type"] = "pencil"
+        # remove some source parameters because they are unnecessary when previewing
+        del self.mcxInput["Optode"]["Source"]["Param1"]
+        del self.mcxInput["Optode"]["Source"]["Param2"]
+        del self.mcxInput["Optode"]["Source"]["Pattern"]        
+        # save mcxInput to output/json_output ("closeup" in file name means we reduce the size of dimension for preview convenience)
+        with open(os.path.join(self.json_output, "input_for_mcxpreview_wholemodel_closeup.json"), 'w') as f:
+            json.dump(self.mcxInput, f, indent=4)
+        
+        # set Domain Dim for previewing hardware arrangement (Zoom out the dimension, ex: make the model only 80mm * 80mm * 25mm)
+        self.mcxInput["Domain"]["Dim"][2] = int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["ZSize"])) * 2
+        # set Shapes and remove some unnecessary items
+        self.setShapes()
+        del self.mcxInput["Domain"]["Media"][6:]
+        del self.mcxInput["Shapes"][6:]
+        self.mcxInput["Shapes"][5]["Subgrid"]["Size"][2] = 5  # change z size of first tissue layer, which equals to z size of dimension - holder size [grid]        
+        # save mcxInput to output/json_output ("closeup" in file name means we reduce the size of dimension for preview convenience)
+        with open(os.path.join(self.json_output, "input_for_mcxpreview_hardware_closeup.json"), 'w') as f:
             json.dump(self.mcxInput, f, indent=4)
 
 
@@ -422,15 +465,8 @@ class MCX:
         # set source position
         self.mcxInput["Optode"]["Source"]["Pos"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2,
                                                     self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2,
-                                                    self.mcxInput["Shapes"][5]["Subgrid"]["O"][2]-1e-6
-                                                    ]
-        # save mcxInput to output/json_output (this file is for preview, not for simulation)
-        self.mcxInputForPreview = deepcopy(self.mcxInput)
-        self.mcxInputForPreview["Optode"]["Source"]["Type"] = "pencil"
-        del self.mcxInputForPreview["Domain"]["Media"][6:]
-        del self.mcxInputForPreview["Shapes"][6:]
-        with open(os.path.join(self.json_output, "input_for_mcxpreview.json"), 'w') as f:
-            json.dump(self.mcxInputForPreview, f, indent=4)
+                                                    self.mcxInput["Shapes"][5]["Subgrid"]["O"][2]-1e-6  # need to minus a very small value here. (if not, irradiating distribution will disappear)
+                                                    ]        
         # set source type
         self.mcxInput["Optode"]["Source"]["Type"] = "anglepattern"
         # set additional parameters about led arrangement (please refer to the hackMD-ijvNotebooks records on 2021/04/09)
@@ -485,13 +521,13 @@ if __name__ == "__main__":
     
     # calculate reflectance first
     reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
-    print("Session name: {} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
+    print("Session name: {} \nReflectance mean: {:.5e} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceMean, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
     
     # initialize
     simulator = MCX(config)
     
     # run
-    while(reflectanceCV.min() > cvThold):
+    while(reflectanceCV.max() > cvThold):
         # run forward mcx
         simulator.run()
         # check cv and print info

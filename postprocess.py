@@ -48,8 +48,11 @@ def plotIntstDistrb(sessionID):
     plt.ylabel("Energy density")
     plt.title("Distribution of intensity along Z axis")
     plt.show()
+    
+    # retrieve the distribution in the first skin layer
     xyDistrb = data[:, :, srcPos[2]]
     xyDistrb = xyDistrb / xyDistrb.max()  # normalization for this surface
+    # retrieve the distribution in the first skin layer near source
     xyDistrbFocusCenter = xyDistrb[srcPos[0]-2*winRadius:srcPos[0]+2*winRadius,
                                    srcPos[1]-2*winRadius:srcPos[1]+2*winRadius]
     # plot distribution in the first skin layer
