@@ -90,6 +90,11 @@ def analyzeReflectance(sessionID):
     
     detOutputPathSet = glob(os.path.join("output", sessionID, "mcx_output", "*.jdat"))
     
+    # for convenience of compressing and calculating cv, remove some output
+    mod = len(detOutputPathSet) % 10
+    if mod != 0:
+        del detOutputPathSet[-mod:]
+    
     # analyze detected photon
     reflectance = np.empty((len(detOutputPathSet), detNum))
     for detOutputIdx, detOutputPath in enumerate(detOutputPathSet):
