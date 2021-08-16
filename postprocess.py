@@ -79,7 +79,7 @@ def plotIntstDistrb(sessionID):
     plt.show()
 
 
-def analyzeReflectance(sessionID):    
+def analyzeReflectance(sessionID, showCvVariation=False):    
     # parameters
     na = 0.22
     nAir = 1
@@ -89,6 +89,8 @@ def analyzeReflectance(sessionID):
     detNum = len(mcxInput["Optode"]["Detector"])
     
     detOutputPathSet = glob(os.path.join("output", sessionID, "mcx_output", "*.jdat"))
+    # sort (to make calculation of cv is consistent in each time)
+    detOutputPathSet.sort(key=lambda x: int(x.split("_")[-2]))
     
     # for convenience of compressing and calculating cv, remove some output
     mod = len(detOutputPathSet) % 10
@@ -126,6 +128,34 @@ def analyzeReflectance(sessionID):
             # I = I0 * exp(-mua*L)
             reflectance[detOutputIdx][detectorIdx] = np.exp(-np.matmul(usedValidPPath, mua)).sum() / info["TotalPhoton"]
             
+    # if showCvVariation is set "true", plot cv variation curve.
+    if showCvVariation:
+        analyzeNum = int(np.floor(np.log10(reflectance.shape[0])))
+        photonNum = []
+        cv = []
+        for i in range(analyzeNum):
+            groupingNum = 10 ** i
+            sample = reflectance[:groupingNum*10].reshape(groupingNum, 10, detNum)
+            sample = sample.mean(axis=0)
+            sampleMean = sample.mean(axis=0)
+            sampleStd = sample.std(axis=0, ddof=1)
+            sampleCV = sampleStd / sampleMean
+            photonNum.append(info["TotalPhoton"] * groupingNum)
+            cv.append(sampleCV)
+        cv = np.array(cv)
+        for detectorIdx in range(cv.shape[1]):
+            print("Photon number:", photonNum)
+            print("sds_{} cv variation: {}".format(detectorIdx, cv[:, detectorIdx]), end="\n\n")
+            plt.plot(photonNum, cv[:, detectorIdx], marker="o", label="sds_{}".format(detectorIdx))
+        plt.xscale("log")
+        plt.yscale("log")
+        # plt.yticks(cv, ["{:.0%}".format(y) for y in cv])
+        plt.legend()
+        plt.xlabel("Photon number")
+        plt.ylabel("Estimated coefficient of variation")
+        plt.title("Estimated coefficient of variation against photon number")
+        plt.show()
+    
     groupingNum = int(reflectance.shape[0] / 10)  # 10 is the cv calculation base
     # grouping reflectance
     reflectance = reflectance.reshape(groupingNum, 10, detNum)  # 10 is the cv calculation base
@@ -138,8 +168,9 @@ def analyzeReflectance(sessionID):
     return reflectance, reflectanceMean, reflectanceCV, info["TotalPhoton"], groupingNum
 
 
+# %%
 if __name__ == "__main__":
-    plotIntstDistrb(sessionID="single_detector")
+    analyzeReflectance("extended_prism", showCvVariation=True)
     
     
     
