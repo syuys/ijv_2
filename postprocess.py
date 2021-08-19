@@ -6,6 +6,9 @@ Created on Fri Aug  6 17:24:45 2021
 @author: md703
 """
 
+from IPython import get_ipython
+get_ipython().magic('clear')
+get_ipython().magic('reset -f')
 import numpy as np
 import matplotlib.pyplot as plt
 plt.close("all")
@@ -84,9 +87,9 @@ def analyzeReflectance(sessionID, showCvVariation=False):
     na = 0.22
     nAir = 1
     nPrism = 1.51
-    with open(os.path.join("output", sessionID, "json_output", "input_745.json")) as f:
-        mcxInput = json.load(f)
-    detNum = len(mcxInput["Optode"]["Detector"])
+    with open(os.path.join("model_input", "model_parameters_{}.json".format(sessionID))) as f:
+        modelParameters = json.load(f)
+    detNum = len(modelParameters["HardwareParam"]["Detector"]["Fiber"])
     
     detOutputPathSet = glob(os.path.join("output", sessionID, "mcx_output", "*.jdat"))
     # sort (to make calculation of cv is consistent in each time)
@@ -127,14 +130,23 @@ def analyzeReflectance(sessionID, showCvVariation=False):
             usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
             # I = I0 * exp(-mua*L)
             reflectance[detOutputIdx][detectorIdx] = np.exp(-np.matmul(usedValidPPath, mua)).sum() / info["TotalPhoton"]
-            
+    
+    # Calculate final CV
+    finalGroupingNum = int(reflectance.shape[0] / 10)  # 10 is the cv calculation base number
+    # grouping reflectance and compress, calculate mean of grouping
+    finalReflectance = reflectance.reshape(finalGroupingNum, 10, detNum).mean(axis=0)  # 10 is the cv calculation base number
+    # calculate real mean and cv for 10 times
+    finalReflectanceMean = finalReflectance.mean(axis=0)
+    finalReflectanceCV = finalReflectance.std(axis=0, ddof=1) / finalReflectanceMean
+    
     # if showCvVariation is set "true", plot cv variation curve.
     if showCvVariation:
-        analyzeNum = int(np.floor(np.log10(reflectance.shape[0])))
+        baseNum = 5
+        analyzeNum = int(np.floor(np.log(reflectance.shape[0])/np.log(baseNum)))
         photonNum = []
         cv = []
         for i in range(analyzeNum):
-            groupingNum = 10 ** i
+            groupingNum = baseNum ** i
             sample = reflectance[:groupingNum*10].reshape(groupingNum, 10, detNum)
             sample = sample.mean(axis=0)
             sampleMean = sample.mean(axis=0)
@@ -142,35 +154,33 @@ def analyzeReflectance(sessionID, showCvVariation=False):
             sampleCV = sampleStd / sampleMean
             photonNum.append(info["TotalPhoton"] * groupingNum)
             cv.append(sampleCV)
+        # add overall cv
+        photonNum.append(info["TotalPhoton"] * finalGroupingNum)
+        cv.append(finalReflectanceCV)
+        print(cv, end="\n\n\n")
+        # plot
         cv = np.array(cv)
         for detectorIdx in range(cv.shape[1]):
             print("Photon number:", photonNum)
             print("sds_{} cv variation: {}".format(detectorIdx, cv[:, detectorIdx]), end="\n\n")
-            plt.plot(photonNum, cv[:, detectorIdx], marker="o", label="sds_{}".format(detectorIdx))
+            plt.plot(photonNum, cv[:, detectorIdx], marker="o", label="sds {:.1f} mm".format(modelParameters["HardwareParam"]["Detector"]["Fiber"][detectorIdx]["SDS"]))
         plt.xscale("log")
         plt.yscale("log")
-        # plt.yticks(cv, ["{:.0%}".format(y) for y in cv])
+        plt.xticks(photonNum, ["{:.2e}".format(x) for x in photonNum], rotation=-90)
+        plt.yticks([1, 0.5, 0.1], ["100%", "50%", "10%"])
         plt.legend()
         plt.xlabel("Photon number")
         plt.ylabel("Estimated coefficient of variation")
         plt.title("Estimated coefficient of variation against photon number")
         plt.show()
     
-    groupingNum = int(reflectance.shape[0] / 10)  # 10 is the cv calculation base
-    # grouping reflectance
-    reflectance = reflectance.reshape(groupingNum, 10, detNum)  # 10 is the cv calculation base
-    # compress reflectance and calculate mean of grouping
-    reflectance = reflectance.mean(axis=0)
-    # calculate real mean and cv for 10 times
-    reflectanceMean = reflectance.mean(axis=0)
-    reflectanceCV = reflectance.std(axis=0, ddof=1) / reflectanceMean
-    
-    return reflectance, reflectanceMean, reflectanceCV, info["TotalPhoton"], groupingNum
+    return reflectance, finalReflectance, finalReflectanceMean, finalReflectanceCV, info["TotalPhoton"], finalGroupingNum
 
 
 # %%
 if __name__ == "__main__":
-    analyzeReflectance("extended_prism", showCvVariation=True)
+    sessionID = "extended_prism"
+    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID, showCvVariation=True)
     
     
     

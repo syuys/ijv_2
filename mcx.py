@@ -517,10 +517,10 @@ if __name__ == "__main__":
     # parameters
     sessionID = "extended_prism"
     config = "configs/config_{}.json".format(sessionID)
-    cvThold = 0.05
+    cvThold = 0.02
     
     # calculate reflectance first
-    reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
+    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
     print("Session name: {} \nReflectance mean: {} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceMean, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
     
     # initialize
@@ -531,5 +531,5 @@ if __name__ == "__main__":
         # run forward mcx
         simulator.run()
         # check cv and print info
-        reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
+        raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID)
         print("Session name: {} \nReflectance mean: {} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceMean, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
