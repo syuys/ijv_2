@@ -96,7 +96,8 @@ def analyzeReflectance(sessionID, showCvVariation=False):
     detOutputPathSet.sort(key=lambda x: int(x.split("_")[-2]))
     
     # for convenience of compressing and calculating cv, remove some output
-    mod = len(detOutputPathSet) % 10
+    cvSampleNum = 10  # the cv calculation base number
+    mod = len(detOutputPathSet) % cvSampleNum
     if mod != 0:
         del detOutputPathSet[-mod:]
     
@@ -132,32 +133,32 @@ def analyzeReflectance(sessionID, showCvVariation=False):
             reflectance[detOutputIdx][detectorIdx] = np.exp(-np.matmul(usedValidPPath, mua)).sum() / info["TotalPhoton"]
     
     # Calculate final CV
-    finalGroupingNum = int(reflectance.shape[0] / 10)  # 10 is the cv calculation base number
+    finalGroupingNum = int(reflectance.shape[0] / cvSampleNum)
     # grouping reflectance and compress, calculate mean of grouping
-    finalReflectance = reflectance.reshape(finalGroupingNum, 10, detNum).mean(axis=0)  # 10 is the cv calculation base number
-    # calculate real mean and cv for 10 times
+    finalReflectance = reflectance.reshape(finalGroupingNum, cvSampleNum, detNum).mean(axis=0)
+    # calculate real mean and cv for [cvSampleNum] times
     finalReflectanceMean = finalReflectance.mean(axis=0)
     finalReflectanceCV = finalReflectance.std(axis=0, ddof=1) / finalReflectanceMean
     
     # if showCvVariation is set "true", plot cv variation curve.
     if showCvVariation:
         baseNum = 5
-        analyzeNum = int(np.floor(np.log(reflectance.shape[0])/np.log(baseNum)))
+        analyzeNum = int(np.ceil(np.log(reflectance.shape[0]/cvSampleNum)/np.log(baseNum)))  # follow logarithm change of base rule
         photonNum = []
         cv = []
         for i in range(analyzeNum):
             groupingNum = baseNum ** i
-            sample = reflectance[:groupingNum*10].reshape(groupingNum, 10, detNum)
+            sample = reflectance[:groupingNum*cvSampleNum].reshape(groupingNum, cvSampleNum, detNum)
             sample = sample.mean(axis=0)
             sampleMean = sample.mean(axis=0)
             sampleStd = sample.std(axis=0, ddof=1)
             sampleCV = sampleStd / sampleMean
             photonNum.append(info["TotalPhoton"] * groupingNum)
             cv.append(sampleCV)
-        # add overall cv
+        # add final(overall) cv
         photonNum.append(info["TotalPhoton"] * finalGroupingNum)
         cv.append(finalReflectanceCV)
-        print(cv, end="\n\n\n")
+        # print(cv, end="\n\n\n")
         # plot
         cv = np.array(cv)
         for detectorIdx in range(cv.shape[1]):
