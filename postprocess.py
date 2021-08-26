@@ -140,6 +140,14 @@ def analyzeReflectance(sessionID, showCvVariation=False):
     finalReflectanceMean = finalReflectance.mean(axis=0)
     finalReflectanceCV = finalReflectance.std(axis=0, ddof=1) / finalReflectanceMean
     
+    # save calculation result after grouping    
+    result = {
+        "SessionID:": sessionID,
+        "ValuesAfterGroupingTo{}Samples".format(cvSampleNum): {"sds_{}".format(detectorIdx): finalReflectance[:, detectorIdx].tolist() for detectorIdx in range(finalReflectance.shape[1])}
+    }
+    with open(os.path.join("output", sessionID, "post_analysis", "{}_simulation_result.json".format(sessionID)), "w") as f:
+        json.dump(result, f, indent=4)
+    
     # if showCvVariation is set "true", plot cv variation curve.
     if showCvVariation:
         baseNum = 5
@@ -180,8 +188,7 @@ def analyzeReflectance(sessionID, showCvVariation=False):
 
 # %%
 if __name__ == "__main__":
-    sessionID = "extended_prism"
-    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID, showCvVariation=True)
+    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="extended_prism", showCvVariation=True)
     
     
     
