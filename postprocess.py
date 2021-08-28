@@ -10,6 +10,7 @@ from IPython import get_ipython
 get_ipython().magic('clear')
 get_ipython().magic('reset -f')
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 plt.close("all")
 import jdata as jd
@@ -186,9 +187,27 @@ def analyzeReflectance(sessionID, showCvVariation=False):
     return reflectance, finalReflectance, finalReflectanceMean, finalReflectanceCV, info["TotalPhoton"], finalGroupingNum
 
 
+def testReflectanceMean(source1, sdsIdx1, source2, sdsIdx2):
+    data1 = source1["ValuesAfterGroupingTo10Samples"]["sds_{}".format(sdsIdx1)]
+    data2 = source2["ValuesAfterGroupingTo10Samples"]["sds_{}".format(sdsIdx2)]
+    tStatistic1, pValue1 = stats.ttest_ind(data1, data2)
+    print("Assume equal variance \nt-statistic: {} \np-value: {}".format(tStatistic1, pValue1), end="\n\n")
+    tStatistic2, pValue2 = stats.ttest_ind(data1, data2, equal_var=False)
+    print("Assume unequal variance \nt-statistic: {} \np-value: {}".format(tStatistic2, pValue2), end="\n\n")
+    
+
+
 # %%
 if __name__ == "__main__":
-    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="extended_prism", showCvVariation=True)
+    # # analyze reflectance with specific session ID
+    # raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="extended_prism", showCvVariation=True)
+    
+    # do t test to infer whether the population means of two simulation are the same.
+    with open("extended_prism_simulation_result.json") as f:
+        result1 = json.load(f)
+    with open("normal_prism_sds_23.5_simulation_result.json") as f:
+        result2 = json.load(f)
+    testReflectanceMean(result1, 2, result2, 0)
     
     
     
