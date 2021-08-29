@@ -130,7 +130,7 @@ class MCX:
         command += " --session {} ".format(session_name)
         command += "--input {} ".format(geometry_file)
         command += "--root {} ".format(root)
-        command += "--gpu 1 " 
+        command += "--gpu 1 "  # use first gpu
         command += "--autopilot 1 " 
         command += "--photon {} ".format(photon)
         command += "--repeat {} ".format(num_batch)

@@ -138,13 +138,20 @@ def analyzeReflectance(sessionID, showCvVariation=False):
     # grouping reflectance and compress, calculate mean of grouping
     finalReflectance = reflectance.reshape(finalGroupingNum, cvSampleNum, detNum).mean(axis=0)
     # calculate real mean and cv for [cvSampleNum] times
+    finalReflectanceStd = finalReflectance.std(axis=0, ddof=1)
     finalReflectanceMean = finalReflectance.mean(axis=0)
-    finalReflectanceCV = finalReflectance.std(axis=0, ddof=1) / finalReflectanceMean
+    finalReflectanceCV = finalReflectanceStd / finalReflectanceMean
     
     # save calculation result after grouping    
     result = {
         "SessionID:": sessionID,
-        "ValuesAfterGroupingTo{}Samples".format(cvSampleNum): {"sds_{}".format(detectorIdx): finalReflectance[:, detectorIdx].tolist() for detectorIdx in range(finalReflectance.shape[1])}
+        "RawSampleNum": reflectance.shape[0],
+        "GroupingNum": finalGroupingNum,
+        "PhotonNum": {"RawSample": "{:.4e}".format(info["TotalPhoton"]), "GroupingSample": "{:.4e}".format(info["TotalPhoton"]*finalGroupingNum)},
+        "GroupingSampleValues": {"sds_{}".format(detectorIdx): finalReflectance[:, detectorIdx].tolist() for detectorIdx in range(finalReflectance.shape[1])},
+        "GroupingSampleStd": {"sds_{}".format(detectorIdx): finalReflectanceStd[detectorIdx] for detectorIdx in range(finalReflectanceStd.shape[0])},
+        "GroupingSampleMean": {"sds_{}".format(detectorIdx): finalReflectanceMean[detectorIdx] for detectorIdx in range(finalReflectanceMean.shape[0])},
+        "GroupingSampleCV": {"sds_{}".format(detectorIdx): finalReflectanceCV[detectorIdx] for detectorIdx in range(finalReflectanceCV.shape[0])}
     }
     with open(os.path.join("output", sessionID, "post_analysis", "{}_simulation_result.json".format(sessionID)), "w") as f:
         json.dump(result, f, indent=4)
@@ -175,7 +182,7 @@ def analyzeReflectance(sessionID, showCvVariation=False):
             print("sds_{} cv variation: {}".format(detectorIdx, cv[:, detectorIdx]), end="\n\n")
             plt.plot(photonNum, cv[:, detectorIdx], marker="o", label="sds {:.1f} mm".format(modelParameters["HardwareParam"]["Detector"]["Fiber"][detectorIdx]["SDS"]))
         plt.xscale("log")
-        plt.yscale("log")
+        # plt.yscale("log")
         plt.xticks(photonNum, ["{:.2e}".format(x) for x in photonNum], rotation=-90)
         plt.yticks([1, 0.5, 0.1], ["100%", "50%", "10%"])
         plt.legend()
@@ -199,15 +206,15 @@ def testReflectanceMean(source1, sdsIdx1, source2, sdsIdx2):
 
 # %%
 if __name__ == "__main__":
-    # # analyze reflectance with specific session ID
-    # raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="extended_prism", showCvVariation=True)
+    # analyze reflectance with specific session ID
+    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="extended_prism", showCvVariation=True)
     
-    # do t test to infer whether the population means of two simulation are the same.
-    with open("extended_prism_simulation_result.json") as f:
-        result1 = json.load(f)
-    with open("normal_prism_sds_23.5_simulation_result.json") as f:
-        result2 = json.load(f)
-    testReflectanceMean(result1, 2, result2, 0)
+    # # do t test to infer whether the population means of two simulation are the same.
+    # with open("extended_prism_simulation_result.json") as f:
+    #     result1 = json.load(f)
+    # with open("normal_prism_sds_23.5_simulation_result.json") as f:
+    #     result2 = json.load(f)
+    # testReflectanceMean(result1, 2, result2, 0)
     
     
     
