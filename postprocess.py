@@ -178,13 +178,14 @@ def analyzeReflectance(sessionID, showCvVariation=False):
         # plot
         cv = np.array(cv)
         for detectorIdx in range(cv.shape[1]):
-            print("Photon number:", photonNum)
+            print("Photon number:", ["{:.4e}".format(prettyPhotonNum) for prettyPhotonNum in photonNum])
             print("sds_{} cv variation: {}".format(detectorIdx, cv[:, detectorIdx]), end="\n\n")
             plt.plot(photonNum, cv[:, detectorIdx], marker="o", label="sds {:.1f} mm".format(modelParameters["HardwareParam"]["Detector"]["Fiber"][detectorIdx]["SDS"]))
         plt.xscale("log")
-        # plt.yscale("log")
+        plt.yscale("log")
         plt.xticks(photonNum, ["{:.2e}".format(x) for x in photonNum], rotation=-90)
-        plt.yticks([1, 0.5, 0.1], ["100%", "50%", "10%"])
+        yticks = plt.yticks()[0][1:-1]
+        plt.yticks(yticks, ["{:.2%}".format(ytick) for ytick in yticks])
         plt.legend()
         plt.xlabel("Photon number")
         plt.ylabel("Estimated coefficient of variation")
