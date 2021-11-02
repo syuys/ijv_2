@@ -175,7 +175,8 @@ class MCX:
         command += "--autopilot 1 " 
         command += "--photon {} ".format(photon)
         command += "--repeat {} ".format(num_batch)
-        command += "--normalize 1 " 
+        command += "--normalize 1 "
+        command += "--specular 1 "
         command += "--reflect 0 "
         if self.config.get("bcFlag"):
             command += "--bc {} ".format(self.config.get("bcFlag"))
@@ -294,26 +295,26 @@ class MCX:
         self.mcxInput["Domain"]["Media"][0]["g"] = self.modelParameters["OptParam"]["Air"]["g"]
         self.mcxInput["Domain"]["Media"][0]["mua"] = 0
         self.mcxInput["Domain"]["Media"][0]["mus"] = self.modelParameters["OptParam"]["Air"]["mus"]
-        # 1: Source PLA
+        # 1: Detector PLA
         self.mcxInput["Domain"]["Media"][1]["n"] = self.modelParameters["OptParam"]["PLA"]["n"]
         self.mcxInput["Domain"]["Media"][1]["g"] = self.modelParameters["OptParam"]["PLA"]["g"]
         self.mcxInput["Domain"]["Media"][1]["mua"] = 0
         self.mcxInput["Domain"]["Media"][1]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]
-        # 2: Detector PLA
-        self.mcxInput["Domain"]["Media"][2]["n"] = self.modelParameters["OptParam"]["PLA"]["n"]
-        self.mcxInput["Domain"]["Media"][2]["g"] = self.modelParameters["OptParam"]["PLA"]["g"]
+        # 2: Detector Prism
+        self.mcxInput["Domain"]["Media"][2]["n"] = self.modelParameters["OptParam"]["Prism"]["n"]
+        self.mcxInput["Domain"]["Media"][2]["g"] = self.modelParameters["OptParam"]["Prism"]["g"]
         self.mcxInput["Domain"]["Media"][2]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][2]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]
-        # 3: Source Air
-        self.mcxInput["Domain"]["Media"][3]["n"] = self.modelParameters["OptParam"]["Air"]["n"]
-        self.mcxInput["Domain"]["Media"][3]["g"] = self.modelParameters["OptParam"]["Air"]["g"]
+        self.mcxInput["Domain"]["Media"][2]["mus"] = self.modelParameters["OptParam"]["Prism"]["mus"]
+        # 3: Source PLA
+        self.mcxInput["Domain"]["Media"][3]["n"] = self.modelParameters["OptParam"]["PLA"]["n"]
+        self.mcxInput["Domain"]["Media"][3]["g"] = self.modelParameters["OptParam"]["PLA"]["g"]
         self.mcxInput["Domain"]["Media"][3]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][3]["mus"] = self.modelParameters["OptParam"]["Air"]["mus"]
-        # 4: Detector Prism
-        self.mcxInput["Domain"]["Media"][4]["n"] = self.modelParameters["OptParam"]["Prism"]["n"]
-        self.mcxInput["Domain"]["Media"][4]["g"] = self.modelParameters["OptParam"]["Prism"]["g"]
+        self.mcxInput["Domain"]["Media"][3]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]        
+        # 4: Source Air
+        self.mcxInput["Domain"]["Media"][4]["n"] = self.modelParameters["OptParam"]["Air"]["n"]
+        self.mcxInput["Domain"]["Media"][4]["g"] = self.modelParameters["OptParam"]["Air"]["g"]
         self.mcxInput["Domain"]["Media"][4]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][4]["mus"] = self.modelParameters["OptParam"]["Prism"]["mus"]
+        self.mcxInput["Domain"]["Media"][4]["mus"] = self.modelParameters["OptParam"]["Air"]["mus"]        
         # 5: Skin
         self.mcxInput["Domain"]["Media"][5]["n"] = self.modelParameters["OptParam"]["Skin"]["n"]
         self.mcxInput["Domain"]["Media"][5]["g"] = self.modelParameters["OptParam"]["Skin"]["g"]
@@ -367,42 +368,26 @@ class MCX:
     
     def setShapes(self):
         # 0: Air
-        self.mcxInput["Shapes"][0]["Grid"]["Size"] = self.mcxInput["Domain"]["Dim"]        
-        # 1: Source PLA
-        self.mcxInput["Shapes"][1]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["XSize"])),
-                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["YSize"])),
-                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["ZSize"]))
+        self.mcxInput["Shapes"][0]["Grid"]["Size"] = self.mcxInput["Domain"]["Dim"] 
+        
+        # 1: Detector PLA (Here, help to extend detector holder for the simulation convenience)
+        self.mcxInput["Shapes"][1]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["XSize"])),
+                                                         int(self.convertUnit(2*self.modelParameters["HardwareParam"]["Detector"]["Holder"]["YSize"] 
+                                                                              + self.modelParameters["HardwareParam"]["Source"]["Holder"]["YSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["ZSize"]))
                                                          ]
         self.mcxInput["Shapes"][1]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
                                                       - int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][0]/2),
                                                       int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2) 
-                                                      - int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][1]/2),
+                                                      - int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["YSize"]/2))
+                                                      - int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["YSize"])),
                                                       0
                                                       ]
-        # 2: Detector PLA
-        self.mcxInput["Shapes"][2]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["XSize"])),
-                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["YSize"])),
-                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Holder"]["ZSize"]))
-                                                         ]
-        self.mcxInput["Shapes"][2]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
-                                                      - int(self.mcxInput["Shapes"][2]["Subgrid"]["Size"][0]/2),
-                                                      int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2) 
-                                                      + int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][1]/2),
-                                                      0
-                                                      ]
-        # 3: Source Air
-        self.mcxInput["Shapes"][3]["Cylinder"]["C0"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
-                                                        int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2),
-                                                        0
-                                                        ]
-        self.mcxInput["Shapes"][3]["Cylinder"]["C1"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
-                                                        int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2),
-                                                        self.mcxInput["Shapes"][1]["Subgrid"]["Size"][2]
-                                                        ]
-        self.mcxInput["Shapes"][3]["Cylinder"]["R"] = int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["IrraWinRadius"]))
-        # 4: Detector Prism
-        self.mcxInput["Shapes"][4]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["XSize"])),
-                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["YSize"])),
+        
+        # 2: Detector Prism (Here, help to extend detector prism for the simulation convenience)
+        self.mcxInput["Shapes"][2]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["XSize"])),
+                                                         int(self.convertUnit(2*self.modelParameters["HardwareParam"]["Detector"]["Prism"]["YSize"] 
+                                                                              + self.modelParameters["HardwareParam"]["Source"]["Holder"]["YSize"])),
                                                          int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["ZSize"]))
                                                          ]
         # self.mcxInput["Shapes"][4]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
@@ -414,20 +399,45 @@ class MCX:
         #                                               0
         #                                               ]
         if len(self.modelParameters["HardwareParam"]["Detector"]["Fiber"]) <= 1:
-            self.mcxInput["Shapes"][4]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2)
-                                                          - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][0]/2),
+            self.mcxInput["Shapes"][2]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2)
+                                                          - int(self.mcxInput["Shapes"][2]["Subgrid"]["Size"][0]/2),
                                                           int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2)
                                                           + int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Fiber"][0]["SDS"]))
-                                                          - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][1]/2),
+                                                          - int(self.mcxInput["Shapes"][2]["Subgrid"]["Size"][1]/2),
                                                           0
                                                           ]
         else:  # for simulating lots of sds at the same time
-            self.mcxInput["Shapes"][4]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
-                                                          - int(self.mcxInput["Shapes"][4]["Subgrid"]["Size"][0]/2),
+            self.mcxInput["Shapes"][2]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
+                                                          - int(self.mcxInput["Shapes"][2]["Subgrid"]["Size"][0]/2),
                                                           int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2)
-                                                          + int(self.mcxInput["Shapes"][1]["Subgrid"]["Size"][1]/2),
+                                                          - int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["YSize"]/2))
+                                                          - int(self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Prism"]["YSize"])),
                                                           0
                                                           ]
+        
+        # 3: Source PLA
+        self.mcxInput["Shapes"][3]["Subgrid"]["Size"] = [int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["XSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["YSize"])),
+                                                         int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["ZSize"]))
+                                                         ]
+        self.mcxInput["Shapes"][3]["Subgrid"]["O"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2) 
+                                                      - int(self.mcxInput["Shapes"][3]["Subgrid"]["Size"][0]/2),
+                                                      int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2) 
+                                                      - int(self.mcxInput["Shapes"][3]["Subgrid"]["Size"][1]/2),
+                                                      0
+                                                      ]
+        
+        # 4: Source Air
+        self.mcxInput["Shapes"][4]["Cylinder"]["C0"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
+                                                        int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2),
+                                                        0
+                                                        ]
+        self.mcxInput["Shapes"][4]["Cylinder"]["C1"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
+                                                        int(self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2),
+                                                        self.mcxInput["Shapes"][3]["Subgrid"]["Size"][2]
+                                                        ]
+        self.mcxInput["Shapes"][4]["Cylinder"]["R"] = int(self.convertUnit(self.modelParameters["HardwareParam"]["Source"]["Holder"]["IrraWinRadius"]))
+        
         # 5: Skin
         self.mcxInput["Shapes"][5]["Subgrid"]["Size"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0],
                                                          self.mcxInput["Shapes"][0]["Grid"]["Size"][1],
@@ -435,8 +445,9 @@ class MCX:
                                                          ]
         self.mcxInput["Shapes"][5]["Subgrid"]["O"] = [0,
                                                       0,
-                                                      self.mcxInput["Shapes"][4]["Subgrid"]["Size"][2]
+                                                      self.mcxInput["Shapes"][4]["Cylinder"]["C1"][2]
                                                       ]
+        
         # 6: Fat
         self.mcxInput["Shapes"][6]["Subgrid"]["Size"] = [self.mcxInput["Shapes"][0]["Grid"]["Size"][0],
                                                          self.mcxInput["Shapes"][0]["Grid"]["Size"][1],
@@ -447,6 +458,7 @@ class MCX:
                                                       self.mcxInput["Shapes"][5]["Subgrid"]["O"][2] 
                                                       + self.mcxInput["Shapes"][5]["Subgrid"]["Size"][2]
                                                       ]
+        
         # 7: Muscle (Reverse the setting order of "Size" and "Order".)
         self.mcxInput["Shapes"][7]["Subgrid"]["O"] = [0,
                                                       0,
@@ -458,6 +470,7 @@ class MCX:
                                                          self.mcxInput["Shapes"][0]["Grid"]["Size"][2] 
                                                          - self.mcxInput["Shapes"][7]["Subgrid"]["O"][2]
                                                          ]        
+        
         # 8: IJV
         self.mcxInput["Shapes"][8]["Cylinder"]["C0"] = [int(self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2),
                                                         0,
@@ -469,6 +482,7 @@ class MCX:
                                                         self.mcxInput["Shapes"][8]["Cylinder"]["C0"][2]
                                                         ]
         self.mcxInput["Shapes"][8]["Cylinder"]["R"] = self.convertUnit(self.modelParameters["GeoParam"]["IJVRadius"])
+        
         # 9: CCA
         ccax = self.mcxInput["Shapes"][8]["Cylinder"]["C0"][0] - self.convertUnit(np.sqrt(self.modelParameters["GeoParam"]["IJVCCADist"]**2 
                                                                                           - (self.modelParameters["GeoParam"]["CCADepth"] - self.modelParameters["GeoParam"]["IJVDepth"])**2
@@ -487,12 +501,53 @@ class MCX:
 
 
     def setOptodes(self):
-        # detector
+        # detector (help to extend to left and right)
         for fiber in self.modelParameters["HardwareParam"]["Detector"]["Fiber"]:
+            # left - top
+            self.mcxInput["Optode"]["Detector"].append({"R": self.convertUnit(fiber["Radius"]),
+                                                        "Pos": [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2 - 2*self.convertUnit(fiber["Radius"]),
+                                                                self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
+                                                                + self.convertUnit(fiber["SDS"]),
+                                                                0
+                                                                ]
+                                                        })
+            # left - bottom
+            self.mcxInput["Optode"]["Detector"].append({"R": self.convertUnit(fiber["Radius"]),
+                                                        "Pos": [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2 - 2*self.convertUnit(fiber["Radius"]),
+                                                                self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
+                                                                - self.convertUnit(fiber["SDS"]),
+                                                                0
+                                                                ]
+                                                        })
+            # middle - top (original)
             self.mcxInput["Optode"]["Detector"].append({"R": self.convertUnit(fiber["Radius"]),
                                                         "Pos": [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2,
                                                                 self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
                                                                 + self.convertUnit(fiber["SDS"]),
+                                                                0
+                                                                ]
+                                                        })
+            # middle - bottom
+            self.mcxInput["Optode"]["Detector"].append({"R": self.convertUnit(fiber["Radius"]),
+                                                        "Pos": [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2,
+                                                                self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
+                                                                - self.convertUnit(fiber["SDS"]),
+                                                                0
+                                                                ]
+                                                        })
+            # right - top
+            self.mcxInput["Optode"]["Detector"].append({"R": self.convertUnit(fiber["Radius"]),
+                                                        "Pos": [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2 + 2*self.convertUnit(fiber["Radius"]),
+                                                                self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
+                                                                + self.convertUnit(fiber["SDS"]),
+                                                                0
+                                                                ]
+                                                        })
+            # right - bottom
+            self.mcxInput["Optode"]["Detector"].append({"R": self.convertUnit(fiber["Radius"]),
+                                                        "Pos": [self.mcxInput["Shapes"][0]["Grid"]["Size"][0]/2 + 2*self.convertUnit(fiber["Radius"]),
+                                                                self.mcxInput["Shapes"][0]["Grid"]["Size"][1]/2 
+                                                                - self.convertUnit(fiber["SDS"]),
                                                                 0
                                                                 ]
                                                         })
@@ -502,6 +557,7 @@ class MCX:
         #                                                  + self.convertUnit(self.modelParameters["HardwareParam"]["Detector"]["Fiber1"]["SDS"]),
         #                                                  0
         #                                                  ]
+        
         # source
         # sampling angles based on the radiation pattern distribution
         ledProfileIn3D = np.genfromtxt(self.modelParameters["HardwareParam"]["Source"]["Beam"]["ProfilePath"], delimiter=",")
@@ -583,8 +639,8 @@ if __name__ == "__main__":
     #     print("Session name: {} \nReflectance mean: {} \nCV: {} \nNecessary photon num: {:.2e}".format(sessionID, reflectanceMean, reflectanceCV, totalPhoton*groupingNum), end="\n\n")
     
     # parameters
-    projectName = "20211012_boundary_condition_check"
-    sessionID = "bc__r___"
+    projectName = "20211026_newmodel_size_test"
+    sessionID = "test"
     
     # initialize
     simulator = MCX(projectName, sessionID)

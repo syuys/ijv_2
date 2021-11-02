@@ -95,11 +95,11 @@ def calReflectionCoeff(incidentAng, n1, n2):
 
 # %% Run
 if __name__ == "__main__":
-    incidentMaterials = [{"Name": "Skin", "n": 1.4}]
+    incidentMaterials = [{"Name": "Skin", "n": 1.42}]
     refractiveMaterials = [{"Name": "Air", "n": 1},
-                            {"Name": "Water", "n": 1.33},
-                            {"Name": "PLA", "n": 1.45},
-                            {"Name": "Prism", "n": 1.51}
+                            # {"Name": "Water", "n": 1.33},
+                            {"Name": "PLA", "n": 1.454},
+                            {"Name": "Prism", "n": 1.512}
                            ]
     plotReflectionCoeff(incidentMaterials, refractiveMaterials)
     calReflectionCoeffOfDiffuseLight(incidentMaterials, refractiveMaterials)

@@ -1,0 +1,64 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MCXLAB - Monte Carlo eXtreme for MATLAB/Octave by Qianqina Fang
+%
+% In this example, we simulate a 4-layer brain model using MCXLAB.
+% We will investigate the differences between the solutions with and 
+% witout boundary reflections (both external and internal) and show
+% you how to display and analyze the resulting data.
+%
+% This file is part of Monte Carlo eXtreme (MCX) URL:http://mcx.sf.net
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear cfg;
+
+%% preparing the input data
+% set seed to make the simulation repeatible
+cfg.seed=hex2dec('623F9A9E'); 
+
+cfg.nphoton=1e7;
+
+% define a 2 layer structure
+% load testIJV_hardwareonly.mat
+% cfg.vol = testIJV_hardwareonly;
+load tissue_model.mat
+cfg.vol=tissue_model;
+
+% define the source position
+cfg.unitinmm = 1;
+cfg.issrcfrom0 = 1;
+cfg.srctype = 'pencil';
+volShape = size(tissue_model);
+cfg.srcpos=[volShape(1)/2, volShape(2)/2, 5.9999];
+cfg.srcdir=[0 0 1];
+fiberR = 0.3675;
+fiberPos = volShape(1)/2 + 14 + fiberR;  % start position
+fiberIdx = 1;  % start id
+while fiberPos <= volShape(1)/2 + 30
+    cfg.detpos(fiberIdx, :) = [fiberPos, volShape(2)/2, 1, fiberR];
+    fiberPos = fiberPos + 2*fiberR;
+    fiberIdx = fiberIdx + 1;
+end
+
+% use the brain optical properties defined at
+% http://mcx.sourceforge.net/cgi-bin/index.cgi?MMC/CollinsAtlasMesh
+% format: [mua(1/mm) mus(1/mm) g n]
+
+cfg.prop=[0 0 1 1.457            % medium 0: Fiber
+   0 0 1 1     % medium 1: Air
+   0 0 1 1.45     % medium 2: PLA
+   0 0 1 1.51     % medium 3: Prism
+   0 9.32 0.9 1.4     % medium 4: Skin
+   0 9.61 0.9 1.4     % medium 5: Fat
+   0 9.61 0.9 1.4     % medium 6: Muscle
+   0 9.61 0.9 1.4     % medium 7: IJV
+   0 9.61 0.9 1.4];   % medium 8: CCA
+
+% time-domain simulation parameters
+cfg.tstart=0;
+cfg.tend=5e-9;
+cfg.tstep=5e-10;
+
+% GPU thread configuration
+cfg.autopilot=1;
+cfg.gpuid=1;
+
+
