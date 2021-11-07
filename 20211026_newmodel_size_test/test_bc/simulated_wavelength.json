@@ -1,0 +1,11 @@
+{
+
+    "__comment__": "This file specifies the wavelength(s) used by us for simulation. The unit of wavelength in the Values object is [nm]",
+    
+    "SessionID": "test",
+    
+    "Values": [
+        900
+    ]
+
+}

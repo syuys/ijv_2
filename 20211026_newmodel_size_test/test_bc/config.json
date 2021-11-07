@@ -1,0 +1,28 @@
+{
+
+    "SessionID": "test_bc",
+    "Type": "ijv",
+    
+    "CVThreshold": 1e-2,
+
+    "PhotonNum": 1e9,
+    "PhotonBatch": 5e9,
+    "RepeatTimes": 10,
+    "VoxelSize": 1,
+
+    "BinaryPath": "mcx/bin",
+    
+    "SimulatedWavelengthPath": "test_bc/simulated_wavelength.json",
+    "ModelParametersPath": "test_bc/model_parameters.json",
+    "MCXInputPath": "shared_files/mcx_input_template/ijv_dense_symmetric_detectors_backgroundfiber.json",
+    
+    "DetectorNA": 0.22,
+
+    "DoSaveFlux": false,
+    "Replay": true,
+    "SimulateWithSameSeed": false,
+    
+    "CustomizedCommands": ["--savedetflag DPXVW --seed -1 ", 
+                          "--savedetflag DPXVW --seed mch --outputformat jnii --replaydet -1"]
+
+}
