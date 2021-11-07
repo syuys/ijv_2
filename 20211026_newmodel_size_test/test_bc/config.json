@@ -17,10 +17,6 @@
     "MCXInputPath": "shared_files/mcx_input_template/ijv_dense_symmetric_detectors_backgroundfiber.json",
     
     "DetectorNA": 0.22,
-
-    "DoSaveFlux": false,
-    "Replay": true,
-    "SimulateWithSameSeed": false,
     
     "CustomizedCommands": ["--savedetflag DPXVW --seed -1 ", 
                           "--savedetflag DPXVW --seed mch --outputformat jnii --replaydet -1"]
