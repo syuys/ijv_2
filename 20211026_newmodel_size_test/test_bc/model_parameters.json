@@ -119,8 +119,8 @@
     
     "ModelSize":{
         "__comment__": "Should consider the prism leg in zSize. The sizes specified below are in [mm].",
-        "XSize": 300,
+        "XSize": 180,
         "YSize": 120,
-        "ZSize": 95
+        "ZSize": 65
     }
 }

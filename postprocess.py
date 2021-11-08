@@ -231,7 +231,7 @@ def testReflectanceMean(source1, sdsIdx1, source2, sdsIdx2):
 # %%
 if __name__ == "__main__":
     # analyze reflectance with specific session ID
-    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="extended_prism", wl=745, showCvVariation=True)
+    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="test_bc", wl=900, showCvVariation=False)
     
     # # do t test to infer whether the population means of two simulation are the same.
     # with open("extended_prism_simulation_result.json") as f:

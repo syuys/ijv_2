@@ -5,8 +5,8 @@
     
     "CVThreshold": 1e-2,
 
-    "PhotonNum": 1e9,
-    "PhotonBatch": 5e9,
+    "PhotonNum": 1e10,
+    "PhotonBatch": 5e10,
     "RepeatTimes": 10,
     "VoxelSize": 1,
 

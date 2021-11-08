@@ -367,12 +367,12 @@ class MCX:
         self.mcxInput["Domain"]["Media"][7]["n"] = self.modelParameters["OptParam"]["IJV"]["n"]
         self.mcxInput["Domain"]["Media"][7]["g"] = self.modelParameters["OptParam"]["IJV"]["g"]
         self.mcxInput["Domain"]["Media"][7]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][7]["mus"] = 207.5
+        self.mcxInput["Domain"]["Media"][7]["mus"] = 256.1
         # 8: CCA
         self.mcxInput["Domain"]["Media"][8]["n"] = self.modelParameters["OptParam"]["CCA"]["n"]
         self.mcxInput["Domain"]["Media"][8]["g"] = self.modelParameters["OptParam"]["CCA"]["g"]
         self.mcxInput["Domain"]["Media"][8]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][8]["mus"] = 207.5
+        self.mcxInput["Domain"]["Media"][8]["mus"] = 256.1
 
     
     def setShapes(self):
