@@ -65,12 +65,10 @@
             	"length10mmEdge": [393, 806],
             	"skin": {
                 	"__comment__": "axis-0 of image is x for line.",
-                	"v": [-90, 1, 0],
                 	"x": 85
             	},
             	"fat": {
                 	"__comment__": "axis-0 of image is x for line.",
-                	"v": [-160, 1, 0],
                 	"x": 128
             	},
             	"ijv": {
@@ -101,16 +99,40 @@
         	},
         	"IJVSmall": {
             	"skinStartEdge": 195,
+            	"bloodThold": 24,
             	"length10mmEdge": [393, 806],
             	"skin": {
                 	"__comment__": "axis-0 of image is x for line.",
-                	"v": [-90, 1, 0],
                 	"x": 85
             	},
             	"fat": {
                 	"__comment__": "axis-0 of image is x for line.",
-                	"v": [-160, 1, 0],
                 	"x": 128
+            	},
+            	"ijv": {
+                	"__comment__": "axis-0 of image is x for line.",
+                	"v": [
+                    	[-1, -2320, 4, -1],
+                    	[-1, -1300, 3, -4],
+                    	[1, -3700, 6, 5],
+                    	[1, -2800, 6, 1],
+                    	[1, -1750, 6, -1],
+                    	[1, 4440, 1, -6],
+                    	[-1, -14050, 8, 13]
+                	],
+                	"x": [
+                    	[590, 800],
+                    	[468, 800],
+                    	[300, 580],
+                    	[330, 450],
+                    	[350, 450],
+                    	[300, 800],
+                    	[400, 850]
+                    ]
+            	},
+            	"cca": {
+                	"__comment__": "[x, y, radius]",
+                	"v": [861, 653, 135]
             	}
         	}
     	}

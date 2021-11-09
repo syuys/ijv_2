@@ -23,14 +23,14 @@ plt.rcParams["figure.dpi"] = 300
 # %% parameters setting
 subject = "Eric"
 date = "20211023"
-state = "IJVLarge"
+state = "IJVSmall"
 tissueSet = ["skin", "fat", "ijv", "cca"]
 with open("blood_vessel_segmentation_line.json") as f:
     paramSet = json.load(f)[subject][date][state]
 skinStartEdge = paramSet["skinStartEdge"]
 bloodThold = paramSet["bloodThold"]
 length10mmEdge = paramSet["length10mmEdge"]
-voxelLength = 1  # [mm]
+voxelLength = 0.25  # [mm]
 gridNumIn10mm = int(10/voxelLength)
 
 
@@ -97,8 +97,6 @@ for idx, tissue in enumerate(tissueSet):
         # sketch potential region
         targetMatch = np.ones((image.shape[1], image.shape[1]), dtype=bool)
         # match line
-        if tissue == "skin" or tissue == "fat":
-            targetMatch = targetMatch & ((np.array(paramSet[tissue]["v"]).reshape(-1, 1, 1) * coordinates).sum(axis=0) < 0)
         if tissue == "ijv":
             for vector in np.array(paramSet[tissue]["v"]):
                 if vector[0] == -1:

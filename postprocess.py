@@ -292,7 +292,7 @@ def testReflectanceMean(source1, sdsIdx1, source2, sdsIdx2):
 # %%
 if __name__ == "__main__":
     # analyze reflectance with specific session ID
-    raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="test_bc", wl=900, showCvVariation=False)
+    # raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = analyzeReflectance(sessionID="test_bc", wl=900, showCvVariation=False)
     
     # # do t test to infer whether the population means of two simulation are the same.
     # with open("extended_prism_simulation_result.json") as f:
@@ -300,6 +300,9 @@ if __name__ == "__main__":
     # with open("normal_prism_sds_20_simulation_result.json") as f:
     #     result2 = json.load(f)
     # testReflectanceMean(result1, 1, result2, 0)
+    
+    # calculate mean pathlength
+    meanPathlength = getMeanPathlength(1.51, 1.51, 0.22, 18, ["/home/md703/Desktop/ijv_2/20211026_newmodel_size_test/test_bc/output/mcx_output/test_bc_900nm_0_detp.jdat"])
     
     
     

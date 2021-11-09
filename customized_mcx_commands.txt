@@ -1,0 +1,9 @@
+1. save flux
+"--save2pt 1 --outputtype E --outputformat jnii "
+
+2. simulate with same seed
+"--seed 1 "
+
+3. replay to determine tissue model size
+["--savedetflag DPXVW --seed -1 ", 
+ "--savedetflag DPXVW --seed mch --outputformat jnii "]

@@ -118,7 +118,7 @@ class MCX:
                 # start to run in a loop (if maximum of cv is not smaller than the cv threshold)
                 while(max(reflectanceCV) > self.config["CVThreshold"]):                
                     # get the left number of repeat times to simulate
-                    if "--save2pt 1" in str(self.config["CustomizedCommands"]):
+                    if "--save2pt 1" in str(self.config["CustomizedCommands"]) or "--seed 1" in str(self.config["CustomizedCommands"]):
                         needAddOutputNum = 1
                         if existedOutputNum >= 1:
                             break
@@ -351,27 +351,27 @@ class MCX:
             self.mcxInput["Domain"]["Media"][4]["mus"] = 1e-4
         else:
             self.mcxInput["Domain"]["Media"][4]["mua"] = 0
-            self.mcxInput["Domain"]["Media"][4]["mus"] = 26.6
+            self.mcxInput["Domain"]["Media"][4]["mus"] = 10.8
         # 5: Fat
         self.mcxInput["Domain"]["Media"][5]["n"] = self.modelParameters["OptParam"]["Fat"]["n"]
         self.mcxInput["Domain"]["Media"][5]["g"] = self.modelParameters["OptParam"]["Fat"]["g"]
         self.mcxInput["Domain"]["Media"][5]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][5]["mus"] = 22.2
+        self.mcxInput["Domain"]["Media"][5]["mus"] = 10.4
         # 6: Muscle
         self.mcxInput["Domain"]["Media"][6]["n"] = self.modelParameters["OptParam"]["Muscle"]["n"]
         self.mcxInput["Domain"]["Media"][6]["g"] = self.modelParameters["OptParam"]["Muscle"]["g"]
         self.mcxInput["Domain"]["Media"][6]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][6]["mus"] = 7.9
+        self.mcxInput["Domain"]["Media"][6]["mus"] = 4.2
         # 7: IJV
         self.mcxInput["Domain"]["Media"][7]["n"] = self.modelParameters["OptParam"]["IJV"]["n"]
         self.mcxInput["Domain"]["Media"][7]["g"] = self.modelParameters["OptParam"]["IJV"]["g"]
         self.mcxInput["Domain"]["Media"][7]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][7]["mus"] = 256.1
+        self.mcxInput["Domain"]["Media"][7]["mus"] = 119.7
         # 8: CCA
         self.mcxInput["Domain"]["Media"][8]["n"] = self.modelParameters["OptParam"]["CCA"]["n"]
         self.mcxInput["Domain"]["Media"][8]["g"] = self.modelParameters["OptParam"]["CCA"]["g"]
         self.mcxInput["Domain"]["Media"][8]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][8]["mus"] = 256.1
+        self.mcxInput["Domain"]["Media"][8]["mus"] = 119.7
 
     
     def setShapes(self):
@@ -545,8 +545,6 @@ class MCX:
                 # sketch potential region
                 targetMatch = np.ones((image.shape[1], image.shape[1]), dtype=bool)
                 # match line
-                if tissue == "skin" or tissue == "fat":
-                    targetMatch = targetMatch & ((np.array(paramSet[tissue]["v"]).reshape(-1, 1, 1) * coordinates).sum(axis=0) < 0)
                 if tissue == "ijv":
                     for vector in np.array(paramSet[tissue]["v"]):
                         if vector[0] == -1:

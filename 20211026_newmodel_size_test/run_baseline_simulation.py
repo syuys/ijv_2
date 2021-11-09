@@ -9,7 +9,7 @@ Created on Sun Oct 31 14:40:14 2021
 from mcx_ultrasound_model import MCX
 
 # parameters
-sessionID = "test_bc"
+sessionID = "test_bc_eric_smallijv_mus_lb"
 
 # initialize
 simulator = MCX(sessionID)
