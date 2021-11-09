@@ -23,12 +23,12 @@ plt.rcParams["figure.dpi"] = 300
 
 def plotIntstDistrb(sessionID):
     # read position of source and radius of irradiated window
-    with open(os.path.join("output", sessionID, "json_output", "input.json")) as f:
+    with open(os.path.join(sessionID, "output", "json_output", "input_900.json")) as f:
         mcxInput = json.load(f)
     srcPos = np.round(mcxInput["Optode"]["Source"]["Pos"]).astype(int)  # srcPos can be converted to integer although the z value may be 19.9999
     winRadius = int(mcxInput["Optode"]["Source"]["Param2"][2]) # winRadius can be converted to integer
     # glob all flux output and read
-    fluxOutputPathSet = glob(os.path.join("output", sessionID, "mcx_output", "*.jnii"))
+    fluxOutputPathSet = glob(os.path.join(sessionID, "output", "mcx_output", "*.jnii"))
     data = np.empty((len(fluxOutputPathSet), 
                      mcxInput["Domain"]["Dim"][0],
                      mcxInput["Domain"]["Dim"][1],
@@ -214,8 +214,69 @@ def getReflectance(innerIndex, outerIndex, detectorNA, detectorNum, detOutputPat
         for detectorIdx in range(info["DetNum"]):
             usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
             # I = I0 * exp(-mua*L)
-            reflectance[detOutputIdx][detectorIdx] = np.exp(-np.matmul(usedValidPPath, mua)).sum() / photonNum
+            reflectance[detOutputIdx][detectorIdx] = getSinglePhotonWeight(usedValidPPath, mua).sum() / photonNum
     return reflectance
+
+
+def getMeanPathlength(innerIndex, outerIndex, detectorNA, detectorNum, detOutputPathSet):
+    # analyze detected photon
+    meanPathlength = np.empty((len(detOutputPathSet), detectorNum))
+    for detOutputIdx, detOutputPath in enumerate(detOutputPathSet):
+        # read detected data
+        detOutput = jd.load(detOutputPath)
+        info = detOutput["MCXData"]["Info"]
+        photonData = detOutput["MCXData"]["PhotonData"]
+        
+        # unit conversion for photon pathlength
+        photonData["ppath"] = photonData["ppath"] * info["LengthUnit"]
+        
+        # retrieve valid detector ID and valid ppath
+        critAng = np.arcsin(detectorNA/innerIndex)
+        afterRefractAng = np.arccos(abs(photonData["v"][:, 2]))
+        beforeRefractAng = np.arcsin(outerIndex*np.sin(afterRefractAng)/innerIndex)
+        validPhotonBool = beforeRefractAng <= critAng
+        validDetID = photonData["detid"][validPhotonBool]
+        validDetID = validDetID - 1  # make detid start from 0
+        validPPath = photonData["ppath"][validPhotonBool]
+        
+        # calculate mean pathlength
+        mua = np.array([0.25,  # skin
+                        0.1,   # fat
+                        0.05,  # muscle
+                        0.4,   # IJV
+                        0.3    # CCA
+                        ])
+        validPPath = validPPath[:, 3:]  # retreive the pathlength of skin, fat, muscle, ijv, cca
+        
+        for detectorIdx in range(info["DetNum"]):
+            # raw pathlength
+            usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
+            # sigma(wi*pi), for i=0, ..., n
+            eachPhotonWeight = getSinglePhotonWeight(usedValidPPath, mua)
+            eachPhotonPercent = eachPhotonWeight / eachPhotonWeight.sum()
+            eachPhotonPercent = eachPhotonPercent.reshape(-1, 1)
+            meanPathlength[detOutputIdx][detectorIdx] = np.sum(eachPhotonPercent*usedValidPPath, axis=0)[-2]  # -2 means ijv's pathlength.
+    return meanPathlength
+
+
+def getSinglePhotonWeight(ppath, mua):
+    """
+
+    Parameters
+    ----------
+    ppath : TYPE
+        pathlength [mm], 2d array.
+    mua : TYPE
+        absorption coefficient [1/mm], 1d array
+
+    Returns
+    -------
+    weight : TYPE
+        final weight of single(each) photon
+
+    """
+    weight = np.exp(-np.matmul(ppath, mua))
+    return weight
 
 
 def testReflectanceMean(source1, sdsIdx1, source2, sdsIdx2):

@@ -118,9 +118,8 @@ class MCX:
                 # start to run in a loop (if maximum of cv is not smaller than the cv threshold)
                 while(max(reflectanceCV) > self.config["CVThreshold"]):                
                     # get the left number of repeat times to simulate
-                    if self.config.get("SimulateWithSameSeed"):
+                    if "--save2pt 1" in str(self.config["CustomizedCommands"]):
                         needAddOutputNum = 1
-                        # if we do simulation with same seed, there is no need to run MC more than one time.
                         if existedOutputNum >= 1:
                             break
                     else:
@@ -347,7 +346,7 @@ class MCX:
         # 4: Skin
         self.mcxInput["Domain"]["Media"][4]["n"] = self.modelParameters["OptParam"]["Skin"]["n"]
         self.mcxInput["Domain"]["Media"][4]["g"] = self.modelParameters["OptParam"]["Skin"]["g"]
-        if self.config.get("DoSaveFlux"):
+        if "--save2pt 1" in str(self.config["CustomizedCommands"]):
             self.mcxInput["Domain"]["Media"][4]["mua"] = 4e4
             self.mcxInput["Domain"]["Media"][4]["mus"] = 1e-4
         else:
