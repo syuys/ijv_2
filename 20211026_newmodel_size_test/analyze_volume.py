@@ -41,8 +41,8 @@ detectorHolderEdgeLength = 31
 
 
 # %% run baseline
-simulator = MCX(sessionID)
-simulator.replay(volDim=baselineDim)
+# simulator = MCX(sessionID)
+# simulator.replay(volDim=baselineDim)
 # retreive output and save reflectance
 outputPathSet = glob(os.path.join(sessionID, "output", "mcx_output", "*.jdat"))
 baselineReflectance = postprocess.getReflectance(1.51, 1.51, 0.22, 18, outputPathSet, config["PhotonNum"])
