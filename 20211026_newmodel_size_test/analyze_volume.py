@@ -11,6 +11,8 @@ import postprocess
 import json
 from copy import deepcopy
 import jdata as jd
+from glob import glob
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 plt.close("all")
@@ -42,7 +44,9 @@ detectorHolderEdgeLength = 31
 simulator = MCX(sessionID)
 simulator.replay(volDim=baselineDim)
 # retreive output and save reflectance
-baselineReflectance = postprocess.getReflectance(1.51, 1.51, 0.22, 18, ["test_bc/output/mcx_output/test_bc_900nm_0_detp.jdat"], config["PhotonNum"]).reshape(-1, 3, 2).mean(axis=2)[-1, 1]
+outputPathSet = glob(os.path.join(sessionID, "output", "mcx_output", "*.jdat"))
+baselineReflectance = postprocess.getReflectance(1.51, 1.51, 0.22, 18, outputPathSet, config["PhotonNum"])
+baselineReflectance = baselineReflectance.reshape(baselineReflectance.shape[0], -1, 3, 2).mean(axis=(0, -1))[-1, 1]
 
 
 # %% run replay for determining best model size
@@ -51,7 +55,7 @@ factorSet = [1, 1, 1]  # x, y, z
 pivotSet = deepcopy(factorSet)
 pivotVariationSet = [[], [], []]  # 2d array
 decentRate = 0.9
-detpNumVariationSet = [[], [], []]
+# detpNumVariationSet = [[], [], []]
 errorThold = np.linspace(1e-2/3, 1e-2, num=3)
 errorVariationSet = [[], [], []]  # 2d array
 reflectanceVariationSet = [[], [], []]
@@ -71,8 +75,10 @@ for idx in range(len(factorSet)):
                                  ceilEven(int(baselineDim[2]*pivotSet[2]))
                                  ])
         # retreive output and save reflectance
-        detpNumVariationSet[idx].append(jd.load("test_bc/output/mcx_output/test_bc_900nm_0_detp.jdat")["MCXData"]["Info"]["DetectedPhoton"])
-        reflectance = postprocess.getReflectance(1.51, 1.51, 0.22, 18, ["test_bc/output/mcx_output/test_bc_900nm_0_detp.jdat"], config["PhotonNum"]).reshape(-1, 3, 2).mean(axis=2)[-1, 1]
+        # detpNumVariationSet[idx].append(jd.load("test_bc/output/mcx_output/test_bc_900nm_0_detp.jdat")["MCXData"]["Info"]["DetectedPhoton"])
+        outputPathSet = glob(os.path.join(sessionID, "output", "mcx_output", "*.jdat"))
+        reflectance = postprocess.getReflectance(1.51, 1.51, 0.22, 18, outputPathSet, config["PhotonNum"])
+        reflectance = reflectance.reshape(reflectance.shape[0], -1, 3, 2).mean(axis=(0, -1))[-1, 1]
         reflectanceVariationSet[idx].append(reflectance)
         # save current error
         error = (reflectance-baselineReflectance)/baselineReflectance
@@ -88,7 +94,7 @@ for idx in range(len(factorSet)):
         # check condition
         cond1 = ceilEven(int(baselineDim[idx]*pivotSet[idx])) == ceilEven(int(baselineDim[idx]*factorSet[idx]))
         cond2 = ceilEven(int(baselineDim[0]*pivotSet[0]))//2 - detectorHolderEdgeLength < 0
-        cond3 = ceilEven(int(baselineDim[1]*pivotSet[1]))//2 < 20  # source holder width
+        cond3 = ceilEven(int(baselineDim[1]*pivotSet[1]))//2 < 20  # consider source holder width + cca edge
         cond4 = ceilEven(int(baselineDim[2]*pivotSet[2])) < 30  # ijv depth + holder height
         if cond1 or cond2 or cond3 or cond4:
             if cond2:
@@ -119,11 +125,11 @@ for idx, errorVariation in enumerate(errorVariationSet):
     plt.title(f"error variation, dim_{idx}, sds={detectorHolderEdgeLength}")
     plt.show()
 # plot detected photon num variation
-for idx, detpNumVariation in enumerate(detpNumVariationSet):
-    plt.plot(detpNumVariation, "-o")
-    plt.xticks(np.arange(len(detpNumVariation)), (np.array(pivotVariationSet[idx])*baselineDim[idx]).astype(int).astype(str))
-    plt.title(f"detected photon number variation, dim_{idx}, sds={detectorHolderEdgeLength}")
-    plt.show()
+# for idx, detpNumVariation in enumerate(detpNumVariationSet):
+#     plt.plot(detpNumVariation, "-o")
+#     plt.xticks(np.arange(len(detpNumVariation)), (np.array(pivotVariationSet[idx])*baselineDim[idx]).astype(int).astype(str))
+#     plt.title(f"detected photon number variation, dim_{idx}, sds={detectorHolderEdgeLength}")
+#     plt.show()
 
 
 # %% save final determined size to replay.json and run and check final error

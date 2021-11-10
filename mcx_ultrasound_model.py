@@ -351,27 +351,27 @@ class MCX:
             self.mcxInput["Domain"]["Media"][4]["mus"] = 1e-4
         else:
             self.mcxInput["Domain"]["Media"][4]["mua"] = 0
-            self.mcxInput["Domain"]["Media"][4]["mus"] = 10.8
+            self.mcxInput["Domain"]["Media"][4]["mus"] = 26.6
         # 5: Fat
         self.mcxInput["Domain"]["Media"][5]["n"] = self.modelParameters["OptParam"]["Fat"]["n"]
         self.mcxInput["Domain"]["Media"][5]["g"] = self.modelParameters["OptParam"]["Fat"]["g"]
         self.mcxInput["Domain"]["Media"][5]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][5]["mus"] = 10.4
+        self.mcxInput["Domain"]["Media"][5]["mus"] = 22.2
         # 6: Muscle
         self.mcxInput["Domain"]["Media"][6]["n"] = self.modelParameters["OptParam"]["Muscle"]["n"]
         self.mcxInput["Domain"]["Media"][6]["g"] = self.modelParameters["OptParam"]["Muscle"]["g"]
         self.mcxInput["Domain"]["Media"][6]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][6]["mus"] = 4.2
+        self.mcxInput["Domain"]["Media"][6]["mus"] = 7.9
         # 7: IJV
         self.mcxInput["Domain"]["Media"][7]["n"] = self.modelParameters["OptParam"]["IJV"]["n"]
         self.mcxInput["Domain"]["Media"][7]["g"] = self.modelParameters["OptParam"]["IJV"]["g"]
         self.mcxInput["Domain"]["Media"][7]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][7]["mus"] = 119.7
+        self.mcxInput["Domain"]["Media"][7]["mus"] = 256.1
         # 8: CCA
         self.mcxInput["Domain"]["Media"][8]["n"] = self.modelParameters["OptParam"]["CCA"]["n"]
         self.mcxInput["Domain"]["Media"][8]["g"] = self.modelParameters["OptParam"]["CCA"]["g"]
         self.mcxInput["Domain"]["Media"][8]["mua"] = 0
-        self.mcxInput["Domain"]["Media"][8]["mus"] = 119.7
+        self.mcxInput["Domain"]["Media"][8]["mus"] = 256.1
 
     
     def setShapes(self):
