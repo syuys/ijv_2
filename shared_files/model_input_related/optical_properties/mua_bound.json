@@ -1,0 +1,23 @@
+{
+    "__comment__": "The mua upper bound and lower bound below are all in unit of [1/cm].",
+    "skin": [
+        0.006,
+        2.458
+    ],
+    "fat": [
+        0.079,
+        1.224
+    ],
+    "muscle": [
+        0.272,
+        0.54
+    ],
+    "ijv": [
+        2.622,
+        7.245
+    ],
+    "cca": [
+        1.813,
+        7.08
+    ]
+}

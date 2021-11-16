@@ -90,52 +90,52 @@ plt.ylabel("mua [1/cm]")
 plt.title("mua of HbO2, Hb, Water (Tu Shi Chen's data)")
 plt.show()
 
-# %% toast data
-mua_toast = pd.read_csv(
-    "/home/md703/Desktop/ijv/input/coefficients.csv").drop(columns="Unnamed: 0", axis=1)
+# # %% toast data
+# mua_toast = pd.read_csv(
+#     "/home/md703/Desktop/ijv/input/coefficients.csv").drop(columns="Unnamed: 0", axis=1)
 
-# 1/cm
-HbO2_mua_toast = np.interp(
-    targetWl, mua_toast["wavelength"].values, mua_toast["oxy"].values)
+# # 1/cm
+# HbO2_mua_toast = np.interp(
+#     targetWl, mua_toast["wavelength"].values, mua_toast["oxy"].values)
 
-# 1/cm
-Hb_mua_toast = np.interp(
-    targetWl, mua_toast["wavelength"].values, mua_toast["deoxy"].values)
+# # 1/cm
+# Hb_mua_toast = np.interp(
+#     targetWl, mua_toast["wavelength"].values, mua_toast["deoxy"].values)
 
-plt.plot(targetWl, HbO2_mua_toast, label="HbO2_toast")
-plt.plot(targetWl, Hb_mua_toast, label="Hb_toast")
-plt.legend()
-plt.xlabel("wl [nm]")
-plt.ylabel("mua [1/cm]")
-plt.title("mua of HbO2 & Hb (toast)")
-plt.show()
+# plt.plot(targetWl, HbO2_mua_toast, label="HbO2_toast")
+# plt.plot(targetWl, Hb_mua_toast, label="Hb_toast")
+# plt.legend()
+# plt.xlabel("wl [nm]")
+# plt.ylabel("mua [1/cm]")
+# plt.title("mua of HbO2 & Hb (toast)")
+# plt.show()
 
-# %% calculate and plot tissue's mua (from toast data)
-# ijv SO2
-SjO2 = 0.7
-# 1/cm
-mua_ijv = HbO2_mua_toast * SjO2 + Hb_mua_toast * (1-SjO2)
-# 1/cm --> 1/mm
-mua_ijv = mua_ijv * 0.1
+# # %% calculate and plot tissue's mua (from toast data)
+# # ijv SO2
+# SjO2 = 0.7
+# # 1/cm
+# mua_ijv = HbO2_mua_toast * SjO2 + Hb_mua_toast * (1-SjO2)
+# # 1/cm --> 1/mm
+# mua_ijv = mua_ijv * 0.1
 
-# cca SO2
-SaO2 = 0.98
-# 1/cm
-mua_cca = HbO2_mua_toast * SaO2 + Hb_mua_toast * (1-SaO2)
-# 1/cm --> 1/mm
-mua_cca = mua_cca * 0.1
+# # cca SO2
+# SaO2 = 0.98
+# # 1/cm
+# mua_cca = HbO2_mua_toast * SaO2 + Hb_mua_toast * (1-SaO2)
+# # 1/cm --> 1/mm
+# mua_cca = mua_cca * 0.1
 
-# plot
-plt.figure(dpi=200)
-plt.plot(targetWl, mua_ijv, '-o',
-         label="{:.0%} ijv, range=({:.2f}, {:.2f})".format(SjO2, mua_ijv.min(), mua_ijv.max()))
-plt.plot(targetWl, mua_cca, '-o',
-         label="{:.0%} cca, range=({:.2f}, {:.2f})".format(SaO2, mua_cca.min(), mua_cca.max()))
-plt.legend()
-plt.xlabel("wl [nm]")
-plt.ylabel("mua [1/mm]")
-plt.title("mua of ijv & cca (toast)")
-plt.show()
+# # plot
+# plt.figure(dpi=200)
+# plt.plot(targetWl, mua_ijv, '-o',
+#          label="{:.0%} ijv, range=({:.2f}, {:.2f})".format(SjO2, mua_ijv.min(), mua_ijv.max()))
+# plt.plot(targetWl, mua_cca, '-o',
+#          label="{:.0%} cca, range=({:.2f}, {:.2f})".format(SaO2, mua_cca.min(), mua_cca.max()))
+# plt.legend()
+# plt.xlabel("wl [nm]")
+# plt.ylabel("mua [1/mm]")
+# plt.title("mua of ijv & cca (toast)")
+# plt.show()
 
 # %% calculate and plot tissue's mua (from Prahl data)
 # ijv SO2

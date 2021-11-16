@@ -41,6 +41,7 @@ def calculateMusp(wl, a, b):
 # %% main
 # present raw data and curve-fit data
 musRange = {}
+musRange["__comment__"] = "The mus upper bound and lower bound below are all in unit of [1/cm]."
 for tissue in tissueType:
     musp = {}
     muspPathSet = glob(os.path.join(tissue, "musp", "*.csv"))

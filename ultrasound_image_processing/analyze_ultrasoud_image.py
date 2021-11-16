@@ -23,14 +23,14 @@ plt.rcParams["figure.dpi"] = 300
 # %% parameters setting
 subject = "Eric"
 date = "20211023"
-state = "IJVSmall"
+state = "IJVLarge"
 tissueSet = ["skin", "fat", "ijv", "cca"]
 with open("blood_vessel_segmentation_line.json") as f:
     paramSet = json.load(f)[subject][date][state]
 skinStartEdge = paramSet["skinStartEdge"]
 bloodThold = paramSet["bloodThold"]
 length10mmEdge = paramSet["length10mmEdge"]
-voxelLength = 0.25  # [mm]
+voxelLength = 0.5  # [mm]
 gridNumIn10mm = int(10/voxelLength)
 
 

@@ -41,8 +41,8 @@ detectorHolderEdgeLength = 31
 
 
 # %% run baseline
-# simulator = MCX(sessionID)
-# simulator.replay(volDim=baselineDim)
+simulator = MCX(sessionID)
+simulator.replay(volDim=baselineDim)
 # retreive output and save reflectance
 outputPathSet = glob(os.path.join(sessionID, "output", "mcx_output", "*.jdat"))
 baselineReflectance = postprocess.getReflectance(1.51, 1.51, 0.22, 18, outputPathSet, config["PhotonNum"])
@@ -56,7 +56,7 @@ pivotSet = deepcopy(factorSet)
 pivotVariationSet = [[], [], []]  # 2d array
 decentRate = 0.9
 # detpNumVariationSet = [[], [], []]
-errorThold = np.linspace(1e-2/3, 1e-2, num=3)
+errorThold = np.linspace(1e-3/3, 1e-3, num=3)
 errorVariationSet = [[], [], []]  # 2d array
 reflectanceVariationSet = [[], [], []]
 # determine best model size
@@ -94,8 +94,8 @@ for idx in range(len(factorSet)):
         # check condition
         cond1 = ceilEven(int(baselineDim[idx]*pivotSet[idx])) == ceilEven(int(baselineDim[idx]*factorSet[idx]))
         cond2 = ceilEven(int(baselineDim[0]*pivotSet[0]))//2 - detectorHolderEdgeLength < 0
-        cond3 = ceilEven(int(baselineDim[1]*pivotSet[1]))//2 < 20  # consider source holder width + cca edge
-        cond4 = ceilEven(int(baselineDim[2]*pivotSet[2])) < 30  # ijv depth + holder height
+        cond3 = ceilEven(int(baselineDim[1]*pivotSet[1]))//2 <= 16  # consider source holder width + cca edge
+        cond4 = ceilEven(int(baselineDim[2]*pivotSet[2])) <= 28  # ijv depth + holder height
         if cond1 or cond2 or cond3 or cond4:
             if cond2:
                 pivotSet[0] = pivotSet[0] / decentRate
