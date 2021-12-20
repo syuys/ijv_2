@@ -23,14 +23,14 @@ plt.rcParams["figure.dpi"] = 300
 # %% parameters setting
 subject = "Eric"
 date = "20211023"
-state = "IJVLarge"
+state = "IJVSmall"
 tissueSet = ["skin", "fat", "ijv", "cca"]
 with open("blood_vessel_segmentation_line.json") as f:
     paramSet = json.load(f)[subject][date][state]
 skinStartEdge = paramSet["skinStartEdge"]
 bloodThold = paramSet["bloodThold"]
 length10mmEdge = paramSet["length10mmEdge"]
-voxelLength = 0.5  # [mm]
+voxelLength = 0.25  # [mm]
 gridNumIn10mm = int(10/voxelLength)
 
 
@@ -144,9 +144,9 @@ def convertUnit(length, voxelSize=voxelLength):
 
 ### related size [mm]
 # model
-modelX = convertUnit(80)
-modelY = convertUnit(60)
-modelZ = convertUnit(30)
+modelX = convertUnit(132)
+modelY = convertUnit(38)
+modelZ = convertUnit(32)
 # source
 srcHolderX = convertUnit(28)
 srcHolderY = convertUnit(28)
@@ -214,11 +214,16 @@ vol[:, :, int(detHolderZ):int(detHolderZ)+fatDepth] = 5
 # skin
 skinDepth = int(paramSet["skin"]["x"]*scalePercentage)
 vol[:, :, int(detHolderZ):int(detHolderZ)+skinDepth] = 4
+# %% Can add perturbed region
 # ijv
 shiftNumber = np.round(modelY//2 - np.mean(legalRowSet["ijv"]), 0).astype(int)
-vol[:, np.array(legalRowSet["ijv"])+shiftNumber, np.array(legalColSet["ijv"])+int(detHolderZ)] = 7
+vol[:, np.array(legalRowSet["ijv"])+shiftNumber, np.array(legalColSet["ijv"])+int(detHolderZ)] = 7 if state == "IJVLarge" else 8    
 # cca
-vol[:, np.array(legalRowSet["cca"])+shiftNumber, np.array(legalColSet["cca"])+int(detHolderZ)] = 8
+# if state == "IJVSmall":
+#     vol[:, np.array(legalRowSet["cca"])+shiftNumber, np.array(legalColSet["cca"])+int(detHolderZ)] = 9
+if state == "IJVLarge":
+    vol[:, np.array(legalRowSet["cca"])+shiftNumber, np.array(legalColSet["cca"])+int(detHolderZ)] = 9
+vol[:, 78, 62] = 7  # fill the hole
 plt.imshow(vol[int(modelX//2), :, :])
 plt.show()
 plt.imshow(vol[int(modelX//2), :, :].T)
@@ -227,7 +232,10 @@ plt.imshow(vol[:, :, 0])
 plt.show()
 plt.imshow(vol[:, int(modelY//2), :].T)
 plt.show()
-sio.savemat('testIJV.mat', {'testIJV': vol})
+# save file
+vol = vol.astype(np.uint8)
+np.save(file="perturbed_large_to_small", arr=vol)
+# sio.savemat('testIJV.mat', {'testIJV': vol})
 # sio.savemat('testIJV.mat', {'testIJV': vol[:, :, :int(detHolderZ)]})
 
 

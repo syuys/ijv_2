@@ -11,6 +11,7 @@ Created on Fri Aug  6 17:24:45 2021
 # get_ipython().magic('reset -f')
 import numpy as np
 from scipy import stats
+from scipy.signal import convolve
 import matplotlib.pyplot as plt
 plt.close("all")
 import jdata as jd
@@ -83,18 +84,18 @@ def plotIntstDistrb(sessionID):
     plt.show()
 
 
-def analyzeReflectance(sessionID, wl, showCvVariation=False):    
+def analyzeReflectance(sessionID, muaPath, showCvVariation=False):    
     # read files
     with open(os.path.join(sessionID, "config.json")) as f:
         config = json.load(f)  # about detector na, & photon number
     with open(os.path.join(sessionID, "model_parameters.json")) as f:
-        modelParameters = json.load(f)     # about index of materials & fiber number
-    detOutputPathSet = glob(os.path.join(sessionID, "output", "mcx_output", "*.jdat"))  # about paths of detected photon data
+        modelParameters = json.load(f)  # about index of materials & fiber number
+    with open(os.path.join(sessionID, muaPath)) as f:
+        mua = json.load(f)
+    detOutputPathSet = glob(os.path.join(config["OutputPath"], sessionID, "mcx_output", "*.jdat"))  # about paths of detected photon data
     
     # main
     if len(detOutputPathSet) > 0:
-        # for saving information
-        rawSampleNum = len(detOutputPathSet)
         # sort (to make calculation of cv be consistent in each time)
         detOutputPathSet.sort(key=lambda x: int(x.split("_")[-2]))
         
@@ -108,7 +109,17 @@ def analyzeReflectance(sessionID, wl, showCvVariation=False):
                 del detOutputPathSet[-mod:]
         
         # get reflectance
-        reflectance = getReflectance(innerIndex=modelParameters["OptParam"]["Prism"]["n"], 
+        reflectance = getReflectance(muaUsed=np.array([mua["1: Air"],
+                                                       mua["2: PLA"],
+                                                       mua["3: Prism"],
+                                                       mua["4: Skin"],
+                                                       mua["5: Fat"],
+                                                       mua["6: Muscle"],
+                                                       mua["7: Muscle or IJV (Perturbed Region)"],
+                                                       mua["8: IJV"],
+                                                       mua["9: CCA"]
+                                                       ]),
+                                     innerIndex=modelParameters["OptParam"]["Prism"]["n"], 
                                      outerIndex=modelParameters["OptParam"]["Prism"]["n"], 
                                      detectorNA=config["DetectorNA"], 
                                      detectorNum=len(modelParameters["HardwareParam"]["Detector"]["Fiber"])*3*2, 
@@ -123,20 +134,27 @@ def analyzeReflectance(sessionID, wl, showCvVariation=False):
         finalReflectanceStd = finalReflectance.std(axis=0, ddof=1)
         finalReflectanceMean = finalReflectance.mean(axis=0)
         finalReflectanceCV = finalReflectanceStd / finalReflectanceMean
+        # doing moving average
+        movingAverageFinalReflectance = (convolve(finalReflectance.reshape(finalReflectance.shape[0], -1, 3, 2).mean(axis=-1), np.ones((1, 3, 3)), 'valid') / 3**2).reshape(finalReflectance.shape[0], -1)
+        movingAverageFinalReflectanceStd = movingAverageFinalReflectance.std(axis=0, ddof=1)
+        movingAverageFinalReflectanceMean = movingAverageFinalReflectance.mean(axis=0)
+        movingAverageFinalReflectanceCV = movingAverageFinalReflectanceStd / movingAverageFinalReflectanceMean
         
-        # save calculation result after grouping    
-        result = {
-            "SessionID:": sessionID,
-            "RawSampleNum": rawSampleNum,
-            "AnalyzedSampleNum": reflectance.shape[0],
-            "GroupingNum": finalGroupingNum,
-            "PhotonNum": {"RawSample": "{:.4e}".format(config["PhotonNum"]), "GroupingSample": "{:.4e}".format(config["PhotonNum"]*finalGroupingNum)},
-            "GroupingSampleValues": {"sds_{}".format(detectorIdx): finalReflectance[:, detectorIdx].tolist() for detectorIdx in range(finalReflectance.shape[1])},
-            "GroupingSampleStd": {"sds_{}".format(detectorIdx): finalReflectanceStd[detectorIdx] for detectorIdx in range(finalReflectanceStd.shape[0])},
-            "GroupingSampleMean": {"sds_{}".format(detectorIdx): finalReflectanceMean[detectorIdx] for detectorIdx in range(finalReflectanceMean.shape[0])},
-            "GroupingSampleCV": {"sds_{}".format(detectorIdx): finalReflectanceCV[detectorIdx] for detectorIdx in range(finalReflectanceCV.shape[0])}
-        }
-        with open(os.path.join(sessionID, "output", "post_analysis", "{}_{}nm_simulation_result.json".format(sessionID, wl)), "w") as f:
+        # save calculation result after grouping
+        with open(os.path.join(config["OutputPath"], sessionID, "post_analysis", "{}_simulation_result.json".format(sessionID))) as f:
+            result = json.load(f)
+        result["AnalyzedSampleNum"] = reflectance.shape[0]
+        result["GroupingNum"] = finalGroupingNum
+        result["PhotonNum"]["GroupingSample"] = "{:.4e}".format(config["PhotonNum"]*finalGroupingNum)
+        result["GroupingSampleValues"] = {"sds_{}".format(detectorIdx): finalReflectance[:, detectorIdx].tolist() for detectorIdx in range(finalReflectance.shape[1])}
+        result["GroupingSampleStd"] = {"sds_{}".format(detectorIdx): finalReflectanceStd[detectorIdx] for detectorIdx in range(finalReflectanceStd.shape[0])}
+        result["GroupingSampleMean"] = {"sds_{}".format(detectorIdx): finalReflectanceMean[detectorIdx] for detectorIdx in range(finalReflectanceMean.shape[0])}
+        result["GroupingSampleCV"] = {"sds_{}".format(detectorIdx): finalReflectanceCV[detectorIdx] for detectorIdx in range(finalReflectanceCV.shape[0])}
+        result["MovingAverageGroupingSampleValues"] = {"sds_{}".format(modelParameters["HardwareParam"]["Detector"]["Fiber"][detectorIdx]["SDS"]): movingAverageFinalReflectance[:, detectorIdx].tolist() for detectorIdx in range(1, movingAverageFinalReflectance.shape[1]-1)}
+        result["MovingAverageGroupingSampleStd"] = {"sds_{}".format(modelParameters["HardwareParam"]["Detector"]["Fiber"][detectorIdx]["SDS"]): movingAverageFinalReflectanceStd[detectorIdx] for detectorIdx in range(1, movingAverageFinalReflectanceStd.shape[0]-1)}
+        result["MovingAverageGroupingSampleMean"] = {"sds_{}".format(modelParameters["HardwareParam"]["Detector"]["Fiber"][detectorIdx]["SDS"]): movingAverageFinalReflectanceMean[detectorIdx] for detectorIdx in range(1, movingAverageFinalReflectanceMean.shape[0]-1)}
+        result["MovingAverageGroupingSampleCV"] = {"sds_{}".format(modelParameters["HardwareParam"]["Detector"]["Fiber"][detectorIdx]["SDS"]): movingAverageFinalReflectanceCV[detectorIdx] for detectorIdx in range(1, movingAverageFinalReflectanceCV.shape[0]-1)}
+        with open(os.path.join(config["OutputPath"], sessionID, "post_analysis", "{}_simulation_result.json".format(sessionID)), "w") as f:
             json.dump(result, f, indent=4)
         
         # if showCvVariation is set "true", plot cv variation curve.
@@ -174,12 +192,12 @@ def analyzeReflectance(sessionID, wl, showCvVariation=False):
             plt.ylabel("Estimated coefficient of variation")
             plt.title("Estimated coefficient of variation against photon number")
             plt.show()
-        return reflectance, finalReflectance, finalReflectanceMean, finalReflectanceCV, config["PhotonNum"], finalGroupingNum
+        return reflectance, movingAverageFinalReflectance, movingAverageFinalReflectanceMean, movingAverageFinalReflectanceCV, config["PhotonNum"], finalGroupingNum
     else:
         return 0, 0, 0, [10000], 0, 0
 
 
-def getReflectance(innerIndex, outerIndex, detectorNA, detectorNum, detOutputPathSet, photonNum, photonDataVisible=False):    
+def getReflectance(muaUsed, innerIndex, outerIndex, detectorNA, detectorNum, detOutputPathSet, photonNum, photonDataVisible=False):    
     # analyze detected photon
     reflectance = np.empty((len(detOutputPathSet), detectorNum))
     for detOutputIdx, detOutputPath in enumerate(detOutputPathSet):
@@ -202,25 +220,40 @@ def getReflectance(innerIndex, outerIndex, detectorNA, detectorNum, detOutputPat
         validDetID = validDetID - 1  # make detid start from 0
         validPPath = photonData["ppath"][validPhotonBool]
         
-        # calculate reflectance
-        mua = np.array([0.25,  # skin
-                        0.1,   # fat
-                        0.05,  # muscle
-                        0.4,   # IJV
-                        0.3    # CCA
-                        ])
-        validPPath = validPPath[:, 3:]  # retreive the pathlength of skin, fat, muscle, ijv, cca
-        
+        # calculate reflectance        
         for detectorIdx in range(info["DetNum"]):
             usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
             # I = I0 * exp(-mua*L)
-            reflectance[detOutputIdx][detectorIdx] = getSinglePhotonWeight(usedValidPPath, mua).sum() / photonNum
+            reflectance[detOutputIdx][detectorIdx] = getSinglePhotonWeight(usedValidPPath, muaUsed).sum() / photonNum
     return reflectance
 
 
-def getMeanPathlength(innerIndex, outerIndex, detectorNA, detectorNum, detOutputPathSet):
+def getMeanPathlength(sessionID, muaPath):
+    # read files
+    with open(os.path.join(sessionID, "config.json")) as f:
+        config = json.load(f)  # about detector na, & photon number    
+    with open(os.path.join(sessionID, "model_parameters.json")) as f:
+        modelParameters = json.load(f)  # about index of materials & fiber number
+    with open(os.path.join(sessionID, muaPath)) as f:
+        mua = json.load(f)
+    detectorNA=config["DetectorNA"]
+    detOutputPathSet = glob(os.path.join(config["OutputPath"], sessionID, "mcx_output", "*.jdat"))  # about paths of detected photon data
+    innerIndex=modelParameters["OptParam"]["Prism"]["n"]
+    outerIndex=modelParameters["OptParam"]["Prism"]["n"]
+    detectorNum=len(modelParameters["HardwareParam"]["Detector"]["Fiber"])*3*2
+    muaUsed=np.array([mua["1: Air"],
+                      mua["2: PLA"],
+                      mua["3: Prism"],
+                      mua["4: Skin"],
+                      mua["5: Fat"],
+                      mua["6: Muscle"],
+                      mua["7: Muscle or IJV (Perturbed Region)"],
+                      mua["8: IJV"],
+                      mua["9: CCA"]
+                      ])
+    
     # analyze detected photon
-    meanPathlength = np.empty((len(detOutputPathSet), detectorNum))
+    meanPathlength = np.empty((len(detOutputPathSet), detectorNum, muaUsed.size))
     for detOutputIdx, detOutputPath in enumerate(detOutputPathSet):
         # read detected data
         detOutput = jd.load(detOutputPath)
@@ -239,23 +272,18 @@ def getMeanPathlength(innerIndex, outerIndex, detectorNA, detectorNum, detOutput
         validDetID = validDetID - 1  # make detid start from 0
         validPPath = photonData["ppath"][validPhotonBool]
         
-        # calculate mean pathlength
-        mua = np.array([0.25,  # skin
-                        0.1,   # fat
-                        0.05,  # muscle
-                        0.4,   # IJV
-                        0.3    # CCA
-                        ])
-        validPPath = validPPath[:, 3:]  # retreive the pathlength of skin, fat, muscle, ijv, cca
-        
+        # calculate mean pathlength        
         for detectorIdx in range(info["DetNum"]):
             # raw pathlength
             usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
             # sigma(wi*pi), for i=0, ..., n
-            eachPhotonWeight = getSinglePhotonWeight(usedValidPPath, mua)
+            eachPhotonWeight = getSinglePhotonWeight(usedValidPPath, muaUsed)
+            if eachPhotonWeight.sum() == 0:
+                meanPathlength[detOutputIdx][detectorIdx] = 0
+                continue
             eachPhotonPercent = eachPhotonWeight / eachPhotonWeight.sum()
             eachPhotonPercent = eachPhotonPercent.reshape(-1, 1)
-            meanPathlength[detOutputIdx][detectorIdx] = np.sum(eachPhotonPercent*usedValidPPath, axis=0)[-2]  # -2 means ijv's pathlength.
+            meanPathlength[detOutputIdx][detectorIdx] = np.sum(eachPhotonPercent*usedValidPPath, axis=0)
     return meanPathlength
 
 
@@ -302,7 +330,7 @@ if __name__ == "__main__":
     # testReflectanceMean(result1, 1, result2, 0)
     
     # calculate mean pathlength
-    meanPathlength = getMeanPathlength(1.51, 1.51, 0.22, 18, ["/home/md703/Desktop/ijv_2/20211026_newmodel_size_test/test_bc/output/mcx_output/test_bc_900nm_0_detp.jdat"])
+    meanPathlength = getMeanPathlength("mus_baseline", "mua.json")
     
     
     

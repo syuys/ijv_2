@@ -1,9 +1,12 @@
-1. save flux
+1. save general wmc data
+"--savedetflag DPXVW --seed -1 --outputformat jnii"
+
+2. save energy
 "--save2pt 1 --outputtype E --outputformat jnii "
 
-2. simulate with same seed
+3. simulate with same seed
 "--seed 1 "
 
-3. replay to determine tissue model size
+4. replay to determine tissue model size
 ["--savedetflag DPXVW --seed -1 ", 
  "--savedetflag DPXVW --seed mch --outputformat jnii "]

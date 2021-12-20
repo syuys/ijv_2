@@ -1,0 +1,21 @@
+{
+    "Comment": "The mua below is 1/mm",
+    
+    "1: Air": 0,
+    
+    "2: PLA": 1e4,
+    
+    "3: Prism": 0,
+    
+    "4: Skin": 0.1232,
+    
+    "5: Fat": 0.06515,
+    
+    "6: Muscle": 0.0293,
+    
+    "7: Muscle or IJV (Perturbed Region)": 0.0293,
+    
+    "8: IJV": 0.49335,
+    
+    "9: CCA": 0.44465
+}

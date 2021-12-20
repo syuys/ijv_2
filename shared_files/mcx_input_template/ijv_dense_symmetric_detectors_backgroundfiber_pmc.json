@@ -1,0 +1,115 @@
+{
+    "Domain": {
+        "Media": [
+            {
+                "n": 1.457,
+                "g": 1,
+                "name": "0: Fiber",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "n": 1,
+                "g": 1,
+                "name": "1: Air",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "n": 1.45,
+                "g": 1,
+                "name": "2: PLA",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "n": 1.51,
+                "g": 1,
+                "name": "3: Prism",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "mua": 0,
+                "g": 0.9,
+                "name": "4: Skin",
+                "n": 1.4,
+                "mus": 2.59
+            },
+            {
+                "mua": 0,
+                "g": 0.9,
+                "name": "5: Fat",
+                "n": 1.4,
+                "mus": 2.59
+            },
+            {
+                "mua": 0,
+                "g": 0.9,
+                "name": "6: Muscle",
+                "n": 1.4,
+                "mus": 2.59
+            },
+            {
+                "mua": 0,
+                "g": 0.99,
+                "name": "7: Muscle or IJV (Perturbed Region)",
+                "n": 1.4,
+                "mus": 2.59
+            },
+            {
+                "mua": 0,
+                "g": 0.99,
+                "name": "8: IJV",
+                "n": 1.4,
+                "mus": 2.59
+            },
+            {
+                "mua": 0,
+                "g": 0.99,
+                "name": "9: CCA",
+                "n": 1.4,
+                "mus": 1.54
+            }
+        ],
+        "Dim": [
+            800,
+            800,
+            260
+        ],
+        "OriginType": 1
+    },
+    "Shapes": [],
+    "Forward": {
+        "T0": 0.0,
+        "Dt": 5e-09,
+        "T1": 5e-09
+    },
+    "Optode": {
+        "Detector": [
+        ],
+        "Source": {
+            "Type": "pencil",
+            "Pos": [
+                400,
+                400,
+                19.9999
+            ],
+            "Dir": [
+                0,
+                0,
+                1
+            ],
+            "Param1": [
+                0,
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    "Session": {
+        "DoNormalize": 1,
+        "ID": "test"
+    }
+}
