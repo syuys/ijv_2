@@ -13,12 +13,26 @@ import json
 import os
 
 # %% Setting
-
 sessionID = "large_ijv_mus_baseline"
 runningNum = False  # (Integer or False)
 cvThreshold = 0.1581
 repeatTimes = 10
 muaPath = "mua.json"
+
+
+# %% load mua for calculating reflectance
+with open(os.path.join(sessionID, muaPath)) as f:
+    mua = json.load(f)
+muaUsed =[mua["1: Air"],
+          mua["2: PLA"],
+          mua["3: Prism"],
+          mua["4: Skin"],
+          mua["5: Fat"],
+          mua["6: Muscle"],
+          mua["7: Muscle or IJV (Perturbed Region)"],
+          mua["8: IJV"],
+          mua["9: CCA"]
+          ]
 
 
 # %% Do simulation
@@ -54,7 +68,7 @@ else:
                 json.dump(simulationResult, f, indent=4)
         existedOutputNum = existedOutputNum + needAddOutputNum
         # calculate reflectance
-        raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID, muaPath=muaPath)
+        raw, reflectance, reflectanceMean, reflectanceCV, totalPhoton, groupingNum = postprocess.analyzeReflectance(sessionID, mua=muaUsed)
         print("Session name: {} \nReflectance mean: {} \nCV: {} \nNecessary photon num: {:.4e}".format(sessionID, 
                                                                                                        reflectanceMean, 
                                                                                                        reflectanceCV, 
