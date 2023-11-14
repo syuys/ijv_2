@@ -1,0 +1,14 @@
+{
+    "SessionID": "H_730",
+    "Type": "phantom",
+    "PhotonNum": 100000000.0,
+    "VoxelSize": 0.25,
+    "BinaryPath": "/home/md703/Desktop/ijv_2/mcx/bin",
+    "VolumePath": "/home/md703/Desktop/ijv_2/ultrasound_image_processing/phantom.npy",
+    "MCXInputPath": "/home/md703/Desktop/ijv_2/shared_files/mcx_input_template/ijv_backgroundfiber_phantom.json",
+    "OutputPath": "/home/md703/Desktop/ijv_2_output/20220308_phantom_calibration",
+    "DetectorNA": 0.22,
+    "CustomizedCommands": [
+        "--savedetflag DSPXV --seed -1 --outputformat jnii"
+    ]
+}

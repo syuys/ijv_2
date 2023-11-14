@@ -1,0 +1,19 @@
+{
+
+    "SessionID": "short_sds",
+    "Type": "ijv",
+
+    "PhotonNum": 1e5,
+    "VoxelSize": 0.25,
+
+    "BinaryPath": "/home/md703/Desktop/ijv_2/mcx/bin",
+    
+    "VolumePath": "/home/md703/Desktop/ijv_2/ultrasound_image_processing/perturbed_large_to_small_smaller_holder.npy",
+    "MCXInputPath": "/home/md703/Desktop/ijv_2/shared_files/mcx_input_template/ijv_dense_symmetric_detectors_backgroundfiber_pmc.json",
+    "OutputPath": "/home/md703/Desktop/ijv_2_output/20220412_different_holder_sds_test",
+    
+    "DetectorNA": 0.22,
+    
+    "CustomizedCommands": ["--savedetflag DSPXV --seed -1 --outputformat jnii"]
+
+}

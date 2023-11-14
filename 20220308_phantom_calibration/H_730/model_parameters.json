@@ -1,0 +1,119 @@
+{
+    "__comment__": "This file specifies easy-to-understand and user-manipulated settings about the parameters of MC model. We can use this file to make the formal configuration for MCX. Additionally, in this file, absorption coefficient, which means mua, of each tissue is not given due to WMC. And all of the length units in this file are all in [mm].",
+    "OptParam": {
+        "__comment__": "The parameters of optical properties below will be used for MC modeling and are classified based on materials.",
+        "Fiber": {
+            "n": 1.457,
+            "g": 1,
+            "mus": 0
+        },
+        "Air": {
+            "n": 1,
+            "g": 1,
+            "mus": 0
+        },
+        "PLA": {
+            "n": 1.45,
+            "g": 1,
+            "mus": 0
+        },
+        "Prism": {
+            "n": 1.51,
+            "g": 1,
+            "mus": 0
+        },
+        "Phantom body": {
+            "n": 1.4,
+            "g": 0,
+            "mus": 1.3735216752074795
+        }
+    },
+    "HardwareParam": {
+        "__comment__": "Some of parameters below will be used in {Shapes} of MCXInput template",
+        "Source": {
+            "Beam": {
+                "__comment__": "Describe the source type to simulate and give the profile path if needed. For example, we don't need profile path if source type is pencil.",
+                "Type": "anglepattern",
+                "ProfilePath": "shared_files/model_input_related/LED_profile_in3D_pfForm_0to89.csv"
+            },
+            "Holder": {
+                "__comment__": "Source holder is put in the center of whole model and pasted onto the tissue surface.",
+                "XSize": 28,
+                "YSize": 28,
+                "ZSize": 6,
+                "IrraWinRadius": 2.5
+            },
+            "LED": {
+                "__comment__": "LED is put in the center of source holder. The distance from LED surface to irradiated window is represented by Surf2Win below.",
+                "XSize": 1.8,
+                "YSize": 2.55,
+                "Surf2Win": 6,
+                "SamplingNumOfRadiationPattern": 100000.0
+            }
+        },
+        "Detector": {
+            "Holder": {
+                "__comment__": "Detector holder is put right next to the source holder.",
+                "XSize": 17,
+                "YSize": 14,
+                "ZSize": 6
+            },
+            "Prism": {
+                "__comment__": "Prism is put in the middle of detector holder and on the skin surface.",
+                "XSize": 17,
+                "YSize": 5,
+                "ZSize": 5
+            },
+            "Fiber": [
+                {
+                    "SDS": 14.5,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 15.235,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 15.97,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 16.705,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 17.44,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 18.175,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 18.91,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 19.645,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 20.38,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 21.115,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 21.85,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 22.585,
+                    "Radius": 0.3675
+                }
+            ]
+        }
+    }
+}
