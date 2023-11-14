@@ -1,0 +1,48 @@
+{
+    "__comment__": "This file specifies the composition of tissue. We can use this file to calculate reflectance after running WMC.",    
+    
+    "skin":{
+        "BloodVol": 0.0027,
+        "SO2": 0.7,
+        "WaterVol": 0.7,
+        "FatVol": 0,
+        "MelaninVol": 0.002,
+        "CollagenVol": 0.2953
+    },
+    
+    "fat":{
+        "BloodVol": 0,
+        "SO2": 0,
+        "WaterVol": 0,
+        "FatVol": 1,
+        "MelaninVol": 0,
+        "CollagenVol": 0
+    },
+    
+    "muscle":{
+        "BloodVol": 0.05,
+        "SO2": 0.8,
+        "WaterVol": 0.75,
+        "FatVol": 0,
+        "MelaninVol": 0,
+        "CollagenVol": 0.2
+    },
+    
+    "ijv":{
+        "BloodVol": 1.0,
+        "SO2": 0.7,
+        "WaterVol": 0,
+        "FatVol": 0,
+        "MelaninVol": 0,
+        "CollagenVol": 0
+    },
+    
+    "cca":{
+        "BloodVol": 1.0,
+        "SO2": 0.99,
+        "WaterVol": 0,
+        "FatVol": 0,
+        "MelaninVol": 0,
+        "CollagenVol": 0
+    }
+}

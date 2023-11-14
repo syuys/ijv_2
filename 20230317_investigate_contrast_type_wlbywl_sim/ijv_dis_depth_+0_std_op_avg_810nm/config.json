@@ -1,0 +1,12 @@
+{
+    "Type": "ijv",
+    "PhotonNum": 100000000,
+    "VoxelSize": 0.25,
+    "BinaryPath": "/home/md703/syu/ijv_2/mcx/bin",
+    "VolumePath": "/home/md703/syu/ijv_2/ultrasound_image_processing/20221218_contrast_investigate_ijvdepth_sdsrange_3to40/perturbed_tinyHolder_contrast_sds_3to40_ijv_depth_+0_std.npy",
+    "MCXInputPath": "/home/md703/syu/ijv_2/shared_files/mcx_input_template/ijv_dense_symmetric_detectors_backgroundfiber_pmc.json",
+    "OutputPath": "/home/md703/syu/ijv_2_output/20230317_investigate_contrast_type_wlbywl_sim",
+    "CustomizedCommands": [
+        "--saveseed 0 --savedetflag DPV --seed -1 --outputformat jnii"
+    ]
+}
