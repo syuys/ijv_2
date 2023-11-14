@@ -1,0 +1,26 @@
+現有問題
+1. 商用光纖卡到鎖骨、肩膀
+2. 較無法量 lower neck 的 ijv 區域 (source-detector 設計問題)
+
+
+文獻回顧
+- chatgpt 說 upper neck 的 ijv 會較淺 (實際文獻還沒確定)，但實際量起來，好像在 lower neck 時，上血管壁會較淺。確定的是 lower neck 的 anterior-posterior diameter 會比較大，也比較不會有 lateral 的問題
+- 先假設量下頸部較好
+
+
+解決方法
+1. 自製光纖
+優點
+- 較柔軟，能解決 1. 的問題
+- 較不會有扭力，容易固定在皮膚表面
+缺點
+- 2. 的問題不會獲得解決，除非固定 detector，調整 sds 時換成移動 source
+
+1. 尺換方向，detector 變成從左邊延伸出
+優點
+- 能解決商用光纖卡鎖骨、肩膀的問題，但可能會變成卡下巴
+- 2 的問題如果要改善，可以考慮將 detector 固定，變成移動 source 來調整 sds (此可同時解決商用光纖卡下巴的問題，如果 detector 固定得緊，可能會能不用改成自製光纖)
+
+
+
+
