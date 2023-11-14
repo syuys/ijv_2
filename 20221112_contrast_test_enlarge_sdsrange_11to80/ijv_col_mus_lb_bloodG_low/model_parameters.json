@@ -1,0 +1,467 @@
+{
+    "__comment__": "This file specifies easy-to-understand and user-manipulated settings about the parameters of MC model. We can use this file to make the formal configuration for MCX. Additionally, in this file, absorption coefficient, which means mua, of each tissue is not given due to WMC. And all of the length units in this file are all in [mm].",
+    "OptParam": {
+        "__comment__": "The parameters of optical properties below will be used for MC modeling and are classified based on materials.",
+        "Fiber": {
+            "n": 1.457,
+            "g": 1,
+            "mus": 0
+        },
+        "Air": {
+            "n": 1,
+            "g": 1,
+            "mus": 0
+        },
+        "PLA": {
+            "n": 1.45,
+            "g": 1,
+            "mus": 0
+        },
+        "Prism": {
+            "n": 1.51,
+            "g": 1,
+            "mus": 0
+        },
+        "Skin": {
+            "n": 1.4,
+            "g": 0.9,
+            "mus": 16.1
+        },
+        "Fat": {
+            "n": 1.4,
+            "g": 0.9,
+            "mus": 14.3
+        },
+        "Muscle": {
+            "n": 1.4,
+            "g": 0.9,
+            "mus": 5.4
+        },
+        "IJV": {
+            "n": 1.4,
+            "g": 0.95,
+            "mus": 33
+        },
+        "CCA": {
+            "n": 1.4,
+            "g": 0.95,
+            "mus": 33
+        }
+    },
+    "HardwareParam": {
+        "__comment__": "Some of parameters below will be used in {Shapes} of MCXInput template",
+        "Source": {
+            "Beam": {
+                "__comment__": "Describe the source type to simulate and give the profile path if needed. For example, we don't need profile path if source type is pencil.",
+                "Type": "anglepattern",
+                "ProfilePath": "shared_files/model_input_related/LED_profile_in3D_pfForm_0to89.csv"
+            },
+            "Holder": {
+                "__comment__": "Source holder is put in the center of whole model and pasted onto the tissue surface.",
+                "XSize": 16,
+                "YSize": 16,
+                "ZSize": 6,
+                "IrraWinRadius": 2.5
+            },
+            "LED": {
+                "__comment__": "LED is put in the center of source holder. The distance from LED surface to irradiated window is represented by Surf2Win below.",
+                "XSize": 1.8,
+                "YSize": 2.55,
+                "Surf2Win": 6,
+                "SamplingNumOfRadiationPattern": 100000.0
+            }
+        },
+        "Detector": {
+            "Holder": {
+                "__comment__": "Detector holder is put right next to the source holder.",
+                "XSize": 42,
+                "YSize": 14,
+                "ZSize": 6
+            },
+            "Prism": {
+                "__comment__": "Prism is put in the middle of detector holder and on the skin surface.",
+                "XSize": 42,
+                "YSize": 5,
+                "ZSize": 5
+            },
+            "Fiber": [
+                {
+                    "SDS": 11.0,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 11.735,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 12.47,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 13.205,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 13.94,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 14.675,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 15.41,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 16.145,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 16.88,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 17.615,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 18.35,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 19.085,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 19.82,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 20.555,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 21.29,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 22.025,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 22.76,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 23.495,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 24.23,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 24.965,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 25.7,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 26.435,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 27.17,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 27.905,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 28.64,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 29.375,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 30.11,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 30.845,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 31.58,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 32.315,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 33.05,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 33.785,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 34.52,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 35.255,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 35.99,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 36.725,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 37.46,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 38.195,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 38.93,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 39.665,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 40.4,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 41.135,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 41.87,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 42.605,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 43.34,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 44.075,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 44.81,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 45.545,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 46.28,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 47.015,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 47.75,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 48.485,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 49.22,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 49.955,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 50.69,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 51.425,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 52.16,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 52.895,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 53.63,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 54.365,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 55.1,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 55.835,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 56.57,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 57.305,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 58.04,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 58.775,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 59.51,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 60.245,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 60.98,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 61.715,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 62.45,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 63.185,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 63.92,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 64.655,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 65.39,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 66.125,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 66.86,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 67.595,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 68.33,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 69.065,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 69.8,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 70.535,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 71.27,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 72.005,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 72.74,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 73.475,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 74.21,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 74.945,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 75.68,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 76.415,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 77.15,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 77.885,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 78.62,
+                    "Radius": 0.3675
+                },
+                {
+                    "SDS": 79.355,
+                    "Radius": 0.3675
+                }
+            ]
+        }
+    }
+}
