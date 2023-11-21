@@ -1,0 +1,53 @@
+# %% parameters
+
+# select project and load wl, bg
+invivo_folder = "20230621_HY_contrast_trend"
+nameSet = [
+            "sds_12.csv", "sds_14.csv", "sds_16.csv", "sds_18.csv", "sds_20.csv", 
+            "sds_22.csv", "sds_24.csv", "sds_26.csv", "sds_28.csv", "sds_30.csv", 
+            "sds_33.csv", 
+            "sds_36.csv", "sds_39.csv", 
+           ]
+data_for_wl = nameSet[0]
+data_for_bg = "background.csv"
+bg_t_start = 10
+bg_t_end   = 610
+isCheckBG = False
+normalStdTimesBG = 7
+showSpikeSpecBG = False
+
+# load raw signal and remove spike
+# frameStart = 0
+# frameEnd = 50
+frameStart = 30
+frameEnd   = 630
+# frameStart = [150, 150, 150, 10,   10,  895, 100, 100]
+# frameEnd   = [255, 255, 255, 115, 115, 1000, 205, 205]
+selectInv = int((np.array(frameEnd) - np.array(frameStart)).mean())
+isCheckRAW = False
+normalStdTimesSDS = 5.5
+showSpikeSpecSDS = False
+isCheckProcessed = False
+
+# remove motion artifact
+isSaveDenoised = False
+removefromidx = [
+                -4, -5, -4, -4, -5, 
+                -4, -4, -4, -4, -5, 
+                -5, 
+                -4, -5,
+                 ]
+split_base = 600
+figSize = (13, 2.5)
+isCheckCVP = False
+isCheckDiffWlVarWithTime = False
+DiffWlNum = 6
+isCheckMeanVarWithTime = True
+scattersize = 11
+isShowArtifact = True
+max_idx_set = []
+min_idx_set = []
+slide = 23
+integrationTime = 0.1
+time = np.arange(0, selectInv*integrationTime, integrationTime)
+pivot = (slide-1) // 2
