@@ -1,0 +1,57 @@
+# %% parameters
+
+# select project and load wl, bg
+invivo_folder = "20230609_KB_contrast_trend"
+nameSet = [
+            "sds_13.csv", 
+            "sds_16.csv", 
+            "sds_19.csv", 
+            "sds_21.csv", 
+            "sds_23.csv", "sds_25.csv", 
+            "sds_27.csv", "sds_29.csv",
+            "sds_32.csv", "sds_35.csv", "sds_38.csv"
+           ]
+data_for_wl = nameSet[0]
+data_for_bg = "background.csv"
+bg_t_start = 10
+bg_t_end   = 610
+normalStdTimesBG = 7
+isCheckBG = False
+showSpikeSpecBG = False
+
+# load raw signal and remove spike
+frameStart = 10
+frameEnd   = 610
+# frameStart = [150, 150, 150, 10,   10,  895, 100, 100]
+# frameEnd   = [255, 255, 255, 115, 115, 1000, 205, 205]
+selectInv = int((np.array(frameEnd) - np.array(frameStart)).mean())
+isCheckRAW = False
+normalStdTimesSDS = 7
+showSpikeSpecSDS = False
+isCheckProcessed = False
+
+# remove motion artifact
+isSaveDenoised = False
+removefromidx = [
+                -5, 
+                -5, 
+                -5, 
+                -5, 
+                -5, -5, 
+                -5, -4, 
+                -4, -4, -3
+                 ]
+split_base = 600
+figSize = (13, 2.5)
+isCheckCVP = False
+isCheckDiffWlVarWithTime = False
+DiffWlNum = 6
+isCheckMeanVarWithTime = True
+scattersize = 11
+isShowArtifact = True
+max_idx_set = []
+min_idx_set = []
+slide = 23
+integrationTime = 0.1
+time = np.arange(0, selectInv*integrationTime, integrationTime)
+pivot = (slide-1) // 2
