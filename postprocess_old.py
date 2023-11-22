@@ -13,7 +13,6 @@ import numpy as np
 from scipy import stats
 from scipy.signal import convolve
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 plt.close("all")
 import jdata as jd
 import os
@@ -23,15 +22,14 @@ plt.rcParams.update({"mathtext.default": "regular"})
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams["figure.dpi"] = 300
 
-def plotIntstDistrb(projectID, sessionID):
+def plotIntstDistrb(sessionID):
     # read position of source and radius of irradiated window
-    with open(os.path.join("/home/md703/syu/ijv_2_output", projectID, sessionID, "json_output", f"input_{sessionID}.json")) as f:
+    with open(os.path.join(sessionID, "output", "json_output", "input_900.json")) as f:
         mcxInput = json.load(f)
-    # print(mcxInput["Optode"]["Source"]["Pos"])
     srcPos = np.round(mcxInput["Optode"]["Source"]["Pos"]).astype(int)  # srcPos can be converted to integer although the z value may be 19.9999
     winRadius = int(mcxInput["Optode"]["Source"]["Param2"][2]) # winRadius can be converted to integer
     # glob all flux output and read
-    fluxOutputPathSet = glob(os.path.join("/home/md703/syu/ijv_2_output", projectID, sessionID, "mcx_output", "*.jnii"))
+    fluxOutputPathSet = glob(os.path.join(sessionID, "output", "mcx_output", "*.jnii"))
     data = np.empty((len(fluxOutputPathSet), 
                      mcxInput["Domain"]["Dim"][0],
                      mcxInput["Domain"]["Dim"][1],
@@ -47,43 +45,33 @@ def plotIntstDistrb(projectID, sessionID):
     # read voxel size (voxel size is the same for all header based on this sessionID)
     voxelSize = header["VoxelSize"][0]    
     # process and plot
-    print(f"data shape: {data.shape}")
-    data = data.mean(axis=0)  # average w.r.t all output
+    data = data.sum(axis=0)
     zDistrb = data.sum(axis=(0, 1))
     # plot distribution along depth
-    plt.plot(zDistrb[:len(zDistrb)//6], marker=".")
+    plt.plot(zDistrb, marker=".")
     plt.xlabel("Depth [grid]")
-    plt.ylabel("Energy density [-]")
-    plt.title("Along Z axis")
-    # plt.title("Distribution of intensity along Z axis")
+    plt.ylabel("Energy density")
+    plt.title("Distribution of intensity along Z axis")
     plt.show()
     
     # retrieve the distribution in the first skin layer
     xyDistrb = data[:, :, srcPos[2]]
     xyDistrb = xyDistrb / xyDistrb.max()  # normalization for this surface
     # retrieve the distribution in the first skin layer near source
-    xyDistrbFocusCenter = xyDistrb[srcPos[0]-int(1.25*winRadius):srcPos[0]+int(1.25*winRadius),
-                                   srcPos[1]-int(1.25*winRadius):srcPos[1]+int(1.25*winRadius)]
-    
+    xyDistrbFocusCenter = xyDistrb[srcPos[0]-2*winRadius:srcPos[0]+2*winRadius,
+                                   srcPos[1]-2*winRadius:srcPos[1]+2*winRadius]
     # plot distribution in the first skin layer
-    plt.figure()
-    ax = plt.gca()
-    im = ax.imshow(xyDistrb.T, cmap="jet")
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.05)
-    plt.colorbar(im, cax=cax)
-    ax.set_xticks(np.linspace(-0.5, xyDistrb.shape[0]-0.5, num=5), 
+    plt.imshow(xyDistrb.T, cmap="jet")
+    plt.colorbar()
+    plt.xticks(np.linspace(-0.5, xyDistrb.shape[0]-0.5, num=5), 
                np.linspace(-xyDistrb.shape[0]*voxelSize/2, xyDistrb.shape[0]*voxelSize/2, num=5))
-    ax.set_yticks(np.linspace(-0.5, xyDistrb.shape[1]-0.5, num=5), 
+    plt.yticks(np.linspace(-0.5, xyDistrb.shape[1]-0.5, num=5), 
                np.linspace(-xyDistrb.shape[1]*voxelSize/2, xyDistrb.shape[1]*voxelSize/2, num=5))
-    ax.set_xlabel("X [mm]")
-    ax.set_ylabel("Y [mm]")
-    ax.set_title("Top view (whole)")
-    # plt.title("Distribution of normalized intensity in the first skin layer")
+    plt.xlabel("X [mm]")
+    plt.ylabel("Y [mm]")
+    plt.title("Distribution of normalized intensity in the first skin layer")
     plt.show()
-    
     # plot distribution in the first skin layer near source
-    print(f"shape of near source: {xyDistrbFocusCenter.shape}")
     plt.imshow(xyDistrbFocusCenter.T, cmap="jet")
     plt.colorbar()
     plt.xticks(np.linspace(-0.5, xyDistrbFocusCenter.shape[0]-0.5, num=5), 
@@ -94,40 +82,6 @@ def plotIntstDistrb(projectID, sessionID):
     plt.ylabel("Y [mm]")
     plt.title("Distribution of normalized intensity in the first skin layer near source")
     plt.show()
-    
-    # plot distribution in the first skin layer near source (add circle edge)
-    origin = xyDistrbFocusCenter.shape[0]//2 - 0.5
-    r = 8
-    theta = np.arange(0, 2*np.pi, 2*np.pi/1000)
-    x = r * np.cos(theta) + origin
-    y = r * np.sin(theta) + origin
-    
-    print(f"shape of near source: {xyDistrbFocusCenter.shape}")
-    plt.imshow(xyDistrbFocusCenter.T, cmap="jet")
-    plt.colorbar()
-    plt.plot(origin, origin, marker="x", color="white")
-    plt.plot(x, y, color="white")
-    plt.xticks(np.linspace(-0.5, xyDistrbFocusCenter.shape[0]-0.5, num=5), 
-               np.linspace(-xyDistrbFocusCenter.shape[0]*voxelSize/2, xyDistrbFocusCenter.shape[0]*voxelSize/2, num=5))
-    plt.yticks(np.linspace(-0.5, xyDistrbFocusCenter.shape[1]-0.5, num=5), 
-               np.linspace(-xyDistrbFocusCenter.shape[1]*voxelSize/2, xyDistrbFocusCenter.shape[1]*voxelSize/2, num=5))
-    plt.xlabel("X [mm]")
-    plt.ylabel("Y [mm]")
-    plt.title("Top view (near source)")
-    # plt.title("Distribution of normalized intensity in the first skin layer near source")
-    plt.show()
-    
-    # plot intensity trend in the first skin layer near source
-    plt.plot(xyDistrbFocusCenter.T[xyDistrbFocusCenter.shape[0]//2-1], marker=".", linestyle="-")
-    plt.xticks(np.linspace(-0.5, xyDistrbFocusCenter.shape[0]-0.5, num=5), 
-               np.linspace(-xyDistrbFocusCenter.shape[0]*voxelSize/2, xyDistrbFocusCenter.shape[0]*voxelSize/2, num=5))
-    plt.xlabel("X [mm]")
-    plt.ylabel("Normalized intensity [-]")
-    plt.title("Distribution of normalized intensity in the first skin layer near source")
-    plt.show()
-    
-    return xyDistrbFocusCenter.T
-    
 
 
 def updateReflectance(sessionID, muaPathSet, detectorNA):
@@ -144,13 +98,11 @@ def updateReflectance(sessionID, muaPathSet, detectorNA):
         with open(os.path.join(config["OutputPath"], sessionID, "post_analysis", f"{sessionID}_simulation_result_{muaType}.json")) as f:
             result = json.load(f)
         oldGroupingNum = result["GroupingNum"]
-        print(f"\n{muaType}: weighted-num (old, new) = ({oldGroupingNum}, {groupingNum})\n")
         # update reflectance
         cvMua = []
         for detectorIdx, (sds, samplevalues) in enumerate(result["MovingAverageGroupingSampleValues"].items()):
-            # weighted-average  
-            # print(f"samplevalues: {samplevalues.shape},  maR: {maR.shape}")
-            samplevalues = (np.array(samplevalues)*oldGroupingNum + maR[:, detectorIdx, muaIdx]*groupingNum) / (oldGroupingNum + groupingNum)            
+            # weighted-average
+            samplevalues = (np.array(samplevalues)*oldGroupingNum + maR[:, detectorIdx, muaIdx]*groupingNum) / (oldGroupingNum + groupingNum)
             # update
             result["MovingAverageGroupingSampleValues"][sds] = samplevalues.tolist()
             result["MovingAverageGroupingSampleStd"][sds] = samplevalues.std(ddof=1)
@@ -178,9 +130,8 @@ def analyzeReflectance(sessionID, muaPathSet, detectorNA, updateResultFile=True,
         modelParameters = json.load(f)  # about index of materials & fiber number
     fiberSet = modelParameters["HardwareParam"]["Detector"]["Fiber"]
     
-    # 20221208 add. if need to recalculate reflectance from jdata in 5TB disk, uncomment the following 2 lines of code, and type in preferred project name
-    # projectName = "20230715_contrast_invivo_geo_simulation"
-    # config["OutputPath"] = f"/media/md703/Expansion/syu/ijv_2_output/{projectName}"
+    # # 20221208 add
+    # config["OutputPath"] = "/media/md703/Expansion/syu/ijv_2_output/20221129_contrast_investigate_op_sdsrange_3to40"
     
     detOutputPathSet = glob(os.path.join(config["OutputPath"], sessionID, "mcx_output", "*.jdat"))  # about paths of detected photon data
     
@@ -243,13 +194,12 @@ def analyzeReflectance(sessionID, muaPathSet, detectorNA, updateResultFile=True,
     finalReflectanceCV = finalReflectanceStd / finalReflectanceMean
     # arange detectors
     if config["Type"] == "ijv":
-        # arange and fold detectors. [cvSampleNum, detectorNum, 3 (width), muaNum]
+        # arange and fold detectors. [cvSampleNum, detectorNumLength, detectorNumWidth, muaNum]
         movingAverageFinalReflectance = finalReflectance.reshape(finalReflectance.shape[0], 
                                                                  -1, 
                                                                  3, 
                                                                  2, # symmetric to source
                                                                  finalReflectance.shape[-1]).mean(axis=-2)  # mean w.r.t symmetry
-        
     if config["Type"] == "phantom":
         movingAverageFinalReflectance = finalReflectance.reshape(finalReflectance.shape[0], -1, 3)
     # movingAverageFinalReflectance = movingAverageFinalReflectance.mean(-1)
@@ -264,14 +214,8 @@ def analyzeReflectance(sessionID, muaPathSet, detectorNA, updateResultFile=True,
     if updateResultFile:
         for muaIdx, muaPath in enumerate(muaPathSet):
             muaType = muaPath.split("/")[-1][:-5]
-            resultfile = f"{sessionID}_simulation_result_{muaType}.json"
-            if os.path.isfile(os.path.join(config["OutputPath"], sessionID, "post_analysis", resultfile)):
-                with open(os.path.join(config["OutputPath"], sessionID, "post_analysis", resultfile)) as f:
-                    result = json.load(f)
-            else:
-                rndpath = glob(os.path.join(config["OutputPath"], sessionID, "post_analysis", "*"))[0]
-                with open(rndpath) as f:
-                    result = json.load(f)
+            with open(os.path.join(config["OutputPath"], sessionID, "post_analysis", f"{sessionID}_simulation_result_{muaType}.json")) as f:
+                result = json.load(f)
             result["AnalyzedSampleNum"] = reflectance.shape[0]
             result["GroupingNum"] = finalGroupingNum
             result["PhotonNum"]["GroupingSample"] = "{:.4e}".format(config["PhotonNum"]*finalGroupingNum)
@@ -283,11 +227,8 @@ def analyzeReflectance(sessionID, muaPathSet, detectorNA, updateResultFile=True,
             result["MovingAverageGroupingSampleStd"] = {"sds_{}".format(fiberSet[detectorIdx+1]["SDS"]): movingAverageFinalReflectanceStd[detectorIdx, muaIdx] for detectorIdx in range(movingAverageFinalReflectanceStd.shape[0])}
             result["MovingAverageGroupingSampleMean"] = {"sds_{}".format(fiberSet[detectorIdx+1]["SDS"]): movingAverageFinalReflectanceMean[detectorIdx, muaIdx] for detectorIdx in range(movingAverageFinalReflectanceMean.shape[0])}
             result["MovingAverageGroupingSampleCV"] = {"sds_{}".format(fiberSet[detectorIdx+1]["SDS"]): movingAverageFinalReflectanceCV[detectorIdx, muaIdx] for detectorIdx in range(movingAverageFinalReflectanceCV.shape[0])}
-            with open(os.path.join(config["OutputPath"], sessionID, "post_analysis", resultfile), "w") as f:
+            with open(os.path.join(config["OutputPath"], sessionID, "post_analysis", f"{sessionID}_simulation_result_{muaType}.json"), "w") as f:
                 json.dump(result, f, indent=4)
-            if "media" in config["OutputPath"]:
-                with open(os.path.join(f"/home/md703/syu/ijv_2_output/{projectName}", sessionID, "post_analysis", resultfile), "w") as f:
-                    json.dump(result, f, indent=4)
     
     # plot cv variation curve.
     if showCvVariation:
@@ -332,13 +273,11 @@ def getReflectance(mua, innerIndex, outerIndex, detectorNA, detectorNum, detOutp
     # analyze detected photon
     reflectance = np.empty((len(detOutputPathSet), detectorNum, mua.shape[1]))
     for detOutputIdx, detOutputPath in enumerate(detOutputPathSet):
-        # # read detected data
-        # detOutput = jd.load(detOutputPath)        
-        # # trim divergent photon
-        # detOutput = trimDivergentPhoton(detOutput, innerIndex, outerIndex, detectorNA)
+        # read detected data
+        detOutput = jd.load(detOutputPath)
         
-        # read and trim detected data
-        detOutput = trimJdata(detOutputPath, innerIndex, outerIndex, detectorNA)
+        # trim divergent photon
+        detOutput = trimDivergentPhoton(detOutput, innerIndex, outerIndex, detectorNA)
         
         # retrieve detector ID and ppath
         photonData = detOutput["MCXData"]["PhotonData"]
@@ -353,63 +292,21 @@ def getReflectance(mua, innerIndex, outerIndex, detectorNA, detectorNum, detOutp
             usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
             # I = I0 * exp(-mua*L), each detectorIdx element contains different mua-reflectance
             reflectance[detOutputIdx, detectorIdx, :] = getSinglePhotonWeight(usedValidPPath, mua).sum(axis=0) / photonNum
-        
-        if len(detOutputPathSet) > 500:
-            if detOutputIdx % 500 == 0:
-                print(f"Ref cal progress ----> {np.around(detOutputIdx/len(detOutputPathSet)*100, 2)}%")
     
     return reflectance
 
 
-def getSpectrum(mua, photonData, info):        
-    # analyze detected photon
-    detOutputNum = len(photonData["detid"])
-    reflectance = np.empty((detOutputNum, info["DetNum"], mua.shape[1]))
-    photonNum = photonData["totalSimPhoton"]
-    
-    for detOutputIdx in range(detOutputNum):
-        # retrieve detector ID and ppath
-        validDetID = photonData["detid"][detOutputIdx]
-        validPPath = photonData["ppath"][detOutputIdx]
-        # # unit conversion for photon pathlength
-        # validPPath *= info["LengthUnit"]
-        
-        # calculate reflectance 
-        for detectorIdx in range(info["DetNum"]):
-            usedValidPPath = validPPath[validDetID[:, 0]==detectorIdx]
-            # I = I0 * exp(-mua*L), each detectorIdx element contains different mua-reflectance
-            # before get weight, usedValidPPath do unit conversion
-            reflectance[detOutputIdx, detectorIdx, :] = getSinglePhotonWeight(usedValidPPath*info["LengthUnit"], mua).sum(axis=0)
-    
-    # sum all detOutputIdx and divided by photonNum
-    reflectance = reflectance.sum(axis=0) / photonNum
-    
-    # arange and fold detectors. [detectorNumLength, detectorNumWidth, muaNum]
-    reflectance = reflectance.reshape(-1, 
-                                      3, 
-                                      2, # symmetric to source
-                                      reflectance.shape[-1]).mean(axis=-2)  # mean w.r.t symmetry
-    print(reflectance.shape)
-    reflectance = movingAverage2D(reflectance, width=3).squeeze(axis=-2)
-    
-    return reflectance
-
-
-def getMeanPathlength(projectID, sessionID, mua):
+def getMeanPathlength(sessionID, mua):
     # read files
-    with open(os.path.join(projectID, sessionID, "config.json")) as f:
+    with open(os.path.join(sessionID, "config.json")) as f:
         config = json.load(f)  # about detector na, & photon number    
-    with open(os.path.join(projectID, sessionID, "model_parameters.json")) as f:
+    with open(os.path.join(sessionID, "model_parameters.json")) as f:
         modelParameters = json.load(f)  # about index of materials & fiber number
-    # detectorNA=config["DetectorNA"]
-    detectorNA = 0.22
-    # detOutputPathSet = glob(os.path.join(config["OutputPath"], sessionID, "mcx_output", "*.jdat"))[:10]  # about paths of detected photon data
-    detOutputPathSet = glob(os.path.join(f"/home/md703/syu/ijv_2_output/{projectID}", sessionID, "mcx_output", "*.jdat"))[:10]  # about paths of detected photon data
-    print(len(detOutputPathSet))
+    detectorNA=config["DetectorNA"]
+    detOutputPathSet = glob(os.path.join(config["OutputPath"], sessionID, "mcx_output", "*.jdat"))  # about paths of detected photon data
     innerIndex=modelParameters["OptParam"]["Prism"]["n"]
     outerIndex=modelParameters["OptParam"]["Fiber"]["n"]
     detectorNum=len(modelParameters["HardwareParam"]["Detector"]["Fiber"])*3*2
-    print(detectorNum)
     
     # analyze detected photon
     meanPathlength = np.empty((len(detOutputPathSet), detectorNum, len(mua)))
@@ -443,10 +340,7 @@ def getMeanPathlength(projectID, sessionID, mua):
             eachPhotonPercent = eachPhotonWeight / eachPhotonWeight.sum()
             eachPhotonPercent = eachPhotonPercent.reshape(-1, 1)
             meanPathlength[detOutputIdx][detectorIdx] = np.sum(eachPhotonPercent*usedValidPPath, axis=0)
-            print(f"usedValidPPath shape: {usedValidPPath.shape}")
-            # meanPathlength[detOutputIdx][detectorIdx] = np.sum(1/usedValidPPath.shape[0]*usedValidPPath, axis=0)
     
-    # print(f"meanpathlength shape: {meanPathlength.shape}")
     cvSampleNum = 10
     meanPathlength = meanPathlength.reshape(-1, cvSampleNum, meanPathlength.shape[-2], meanPathlength.shape[-1]).mean(axis=0)
     movingAverageMeanPathlength = meanPathlength.reshape(meanPathlength.shape[0], -1, 3, 2, meanPathlength.shape[-1]).mean(axis=-2)
@@ -478,15 +372,11 @@ def getSinglePhotonWeight(ppath, mua):
 
 def movingAverage2D(arr, width):
     if arr.ndim == 3:
-        kernel = np.ones((width, width, 1))
-    
-    # arr: [cvSampleNum, detectorNum (ex: 51), width (ex: 3), muaNum]
+        kernel = np.ones((1, width, width))
     elif arr.ndim == 4:
         kernel = np.ones((1, width, width, 1))
-    
     else:
         raise Exception("arr shape is strange !")
-    
     return convolve(arr, kernel, "valid") / width**2
 
 
@@ -499,8 +389,6 @@ def trimJdata(detOutputPath, innerIndex, outerIndex, detectorNA):
     
     # re-save
     jd.save(jd.encode(detOutput, {'compression':'zlib','base64':1}), detOutputPath)
-    
-    return detOutput
 
 
 def trimDivergentPhoton(detOutput, innerIndex, outerIndex, detectorNA):
@@ -514,7 +402,7 @@ def trimDivergentPhoton(detOutput, innerIndex, outerIndex, detectorNA):
     validPhotonBool = beforeRefractAng <= critAng
     detOutput["MCXData"]["PhotonData"]["detid"] = detOutput["MCXData"]["PhotonData"]["detid"][validPhotonBool]
     if detOutput["MCXData"]["PhotonData"]["detid"].min() == 1:
-        detOutput["MCXData"]["PhotonData"]["detid"] -= 1  # make detid start from 0
+        detOutput["MCXData"]["PhotonData"]["detid"] = detOutput["MCXData"]["PhotonData"]["detid"] - 1  # make detid start from 0
     detOutput["MCXData"]["PhotonData"]["ppath"] = detOutput["MCXData"]["PhotonData"]["ppath"][validPhotonBool]
     detOutput["MCXData"]["PhotonData"]["v"] = detOutput["MCXData"]["PhotonData"]["v"][validPhotonBool]
     if detOutput["MCXData"]["PhotonData"]["v"].shape[1] == 3:
@@ -573,22 +461,22 @@ if __name__ == "__main__":
     #     result2 = json.load(f)
     # testReflectanceMean(result1, 1, result2, 0)
     
-    #### calculate mean pathlength
-    sessionID = "mus_baseline"
-    muaPath = "mua.json"
-    with open(os.path.join(sessionID, muaPath)) as f:
-        mua = json.load(f)
-    muaUsed =[mua["1: Air"],
-              mua["2: PLA"],
-              mua["3: Prism"],
-              mua["4: Skin"],
-              mua["5: Fat"],
-              mua["6: Muscle"],
-              mua["7: Muscle or IJV (Perturbed Region)"],
-              mua["8: IJV"],
-              mua["9: CCA"]
-              ]
-    meanPathlength, movingAverageMeanPathlength = getMeanPathlength(sessionID, mua=muaUsed)
+    # #### calculate mean pathlength
+    # sessionID = "mus_baseline"
+    # muaPath = "mua.json"
+    # with open(os.path.join(sessionID, muaPath)) as f:
+    #     mua = json.load(f)
+    # muaUsed =[mua["1: Air"],
+    #           mua["2: PLA"],
+    #           mua["3: Prism"],
+    #           mua["4: Skin"],
+    #           mua["5: Fat"],
+    #           mua["6: Muscle"],
+    #           mua["7: Muscle or IJV (Perturbed Region)"],
+    #           mua["8: IJV"],
+    #           mua["9: CCA"]
+    #           ]
+    # meanPathlength, movingAverageMeanPathlength = getMeanPathlength(sessionID, mua=muaUsed)
     
     
     

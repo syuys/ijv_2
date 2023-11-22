@@ -15,23 +15,25 @@ get_ipython().magic('reset -f')
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-plt.close("all")
-plt.rcParams.update({"mathtext.default": "regular"})
-plt.rcParams["font.family"] = "Times New Roman"
+import scienceplots
+plt.style.use(['science', 'grid'])
 plt.rcParams["figure.dpi"] = 300
+# plt.close("all")
+# plt.rcParams.update({"mathtext.default": "regular"})
+# plt.rcParams["font.family"] = "Times New Roman"
 
 # %% read epsilon
-targetWl = np.linspace(650, 950, num=401, dtype=int)
-epsilonHbO2HbPath = "shared_files/model_input_related/absorption/epsilon_hemoglobin.txt"
+targetWl = np.linspace(725, 875, num=151, dtype=int)
+epsilonHbO2HbPath = "shared_files/model_input_related/optical_properties/blood/mua/epsilon_hemoglobin.txt"
 toastMuaPath = "20210828_mcxnewcode_reliability_validation/input/coefficients.csv"
 # concentration of hemoglobin (100% for Hb or HbO2)
-conc = 110  # [g/L]
+conc = 150  # [g/L]
 molecularweightHbO2 = 64532  # [g/mol]
 molecularweightHb = 64500  # [g/mol]
 
 # %% read epsilon & calculate mua & plot
 # read toast's mua
-toastMua = pd.read_csv(toastMuaPath)
+# toastMua = pd.read_csv(toastMuaPath)
 
 # read epsilon
 epsilonHbO2Hb = pd.read_csv(epsilonHbO2HbPath, sep="\t", names=["wl", "HbO2", "Hb"])
@@ -80,15 +82,15 @@ plt.title("mua of HbO2, Hb, Water")
 plt.show()
 
 # plot toast's mua
-plt.plot(toastMua.wavelength.values, toastMua.oxy.values, label="HbO2")
-plt.plot(toastMua.wavelength.values, toastMua.deoxy.values, label="Hb")
-plt.plot(toastMua.wavelength.values, abs(toastMua.oxy.values-toastMua.deoxy.values), "k--", label="|HbO2-Hb|")
-plt.plot(toastMua.wavelength.values, toastMua.water.values, label="water")
-plt.legend()
-plt.xlabel("wavelength [nm]")
-plt.ylabel("mua [1/cm]")
-plt.title("mua of HbO2, Hb, Water (Tu Shi Chen's data)")
-plt.show()
+# plt.plot(toastMua.wavelength.values, toastMua.oxy.values, label="HbO2")
+# plt.plot(toastMua.wavelength.values, toastMua.deoxy.values, label="Hb")
+# plt.plot(toastMua.wavelength.values, abs(toastMua.oxy.values-toastMua.deoxy.values), "k--", label="|HbO2-Hb|")
+# plt.plot(toastMua.wavelength.values, toastMua.water.values, label="water")
+# plt.legend()
+# plt.xlabel("wavelength [nm]")
+# plt.ylabel("mua [1/cm]")
+# plt.title("mua of HbO2, Hb, Water (Tu Shi Chen's data)")
+# plt.show()
 
 # # %% toast data
 # mua_toast = pd.read_csv(
@@ -164,12 +166,35 @@ plt.ylabel("mua [1/mm]")
 plt.title("mua of ijv & cca (Prahl, conc={}g/L)".format(conc))
 plt.show()
 
+plt.figure(figsize=(3.5, 1.5))
+wlinterest = np.array([730, 760, 780, 810, 850])
+ijvidx = []
+for w in wlinterest:
+    idx = np.where(targetWl==w)[0][0]
+    ijvidx.append(idx)
+plt.plot(targetWl, mua_ijv*10, label="$S_{ijv}O_2$ = 70\%, [Hb] = 150 g/L")
+plt.plot(wlinterest, mua_ijv[ijvidx]*10, "o", color="red", label="730, 760, 780, 810, 850 nm")
+plt.ylim(2.622, 7.245)
+plt.legend(edgecolor="black", fontsize="small")
+plt.xlabel("Wavelength [nm]")
+plt.ylabel("$\mu_a$ [$cm^{-1}$]")
+plt.grid(visible=False)
+plt.title("IJV")
+plt.show()
+
 # %% find mua range of each SO2 -- blood
-mua = {"HbO2": {"Prahl": HbO2_mua,
-                "toast": HbO2_mua_toast
+# mua = {"HbO2": {"Prahl": HbO2_mua,
+#                 "toast": HbO2_mua_toast
+#                 },
+#        "Hb": {"Prahl": Hb_mua,
+#               "toast": Hb_mua_toast}
+#        }
+
+# 20230216 add
+mua = {"HbO2": {"Prahl": HbO2_mua
                 },
-       "Hb": {"Prahl": Hb_mua,
-              "toast": Hb_mua_toast}
+       "Hb": {"Prahl": Hb_mua
+              }
        }
 
 # SO2

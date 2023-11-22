@@ -16,16 +16,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from colour import Color
-plt.close("all")
-plt.rcParams.update({"mathtext.default": "regular"})
-plt.rcParams["font.family"] = "Times New Roman"
-plt.rcParams["figure.dpi"] = 300
+import scienceplots
+plt.style.use(['science', 'grid'])
+# plt.close("all")
+# plt.rcParams.update({"mathtext.default": "regular"})
+# plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams["figure.dpi"] = 600
 
 # %% parameters
 # read data
 observeWl = np.linspace(650, 950, num=301, dtype=int)
 projectWl = np.linspace(725, 875, num=151, dtype=int)
-epsilonHbO2HbPath = "shared_files/model_input_related/absorption/epsilon_hemoglobin.txt"
+epsilonHbO2HbPath = "shared_files/model_input_related/optical_properties/blood/mua/epsilon_hemoglobin.txt"
 conc = 150  # [g/L], concentration of hemoglobin (100% for Hb or HbO2)
 molecularweightHbO2 = 64532  # [g/mol]
 molecularweightHb = 64500  # [g/mol]
@@ -103,5 +105,22 @@ plt.xlabel("wl [nm]")
 plt.ylabel("mua [1/cm]")
 plt.title("mua in different SO2, conc={}".format(concSet))
 plt.show()
+
+
+# %% plot Parah's hemoglobin absorption spec
+wledge = [650, 950]
+wl = epsilonHbO2Hb["wl"][(epsilonHbO2Hb["wl"]>=wledge[0]) & (epsilonHbO2Hb["wl"]<=wledge[1])]
+hbo2 = epsilonHbO2Hb["HbO2"][(epsilonHbO2Hb["wl"]>=wledge[0]) & (epsilonHbO2Hb["wl"]<=wledge[1])]
+hb = epsilonHbO2Hb["Hb"][(epsilonHbO2Hb["wl"]>=wledge[0]) & (epsilonHbO2Hb["wl"]<=wledge[1])]
+plt.figure(figsize=(4, 2.8))
+plt.plot(wl, hbo2, c="red", linewidth=3, label="O$_2$Hb")
+plt.plot(wl, hb, c="blue", linewidth=3, label="HHb")
+plt.legend(edgecolor="black", fontsize="medium")
+plt.grid(visible=False)
+# plt.yscale("log")
+plt.xlabel("Wavelength [nm]")
+plt.ylabel("Molar extinction coefficient [cm$^{-1}$/M]")
+plt.show()
+
 
 
