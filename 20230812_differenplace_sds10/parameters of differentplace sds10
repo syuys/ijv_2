@@ -1,0 +1,46 @@
+# %% parameters
+
+# select project and load wl, bg
+invivo_folder = "20230812_differenplace_sds10"
+nameSet = [
+            "sds_10_lower.csv", "sds_10_middle.csv", "sds_10_upper.csv", 
+           ]
+data_for_wl = nameSet[0]
+data_for_bg = "background.csv"
+bg_t_start = 10
+bg_t_end   = 610
+isCheckBG = False
+normalStdTimesBG = 7
+showSpikeSpecBG = False
+
+# load raw signal and remove spike
+frameStart = -603
+frameEnd   = -3
+selectInv = int((np.array(frameEnd) - np.array(frameStart)).mean())
+isCheckRAW = False
+normalStdTimesSDS = 5
+showSpikeSpecSDS = False
+isCheckProcessed = False
+
+# remove motion artifact
+isSaveDenoised = False
+isSavePeak = False
+isSaveContrast = False
+removefromidx = [
+                2, 2, 2, 2, 2, 2,
+                2, 2, 2, 2, 2, 2,
+                2, 2, 2, 2, 2, 2,
+                 ]
+split_base = 600
+figSize = (13, 2.5)
+isCheckCVP = False
+isCheckDiffWlVarWithTime = False
+DiffWlNum = 6
+isCheckMeanVarWithTime = True
+scattersize = 11
+isShowArtifact = True
+max_idx_set = []
+min_idx_set = []
+# slide = 23
+integrationTime = 0.1
+time = np.arange(0, selectInv*integrationTime, integrationTime)
