@@ -1,0 +1,11 @@
+{
+    "__comment__": "The  coefficient is based on: noise = np.sqrt(noise_r**2 + S/G). S is the intensity measured by QEPro. Noise is the expected noise w.r.t the reflectance.",
+    "source": "20230214_phantom_signal",
+    "Integration time [s]": 0.1,
+    "Pixel number of MovingAverage": 23,
+    "R square": 0.9891686940894647,
+    "Coefficient": {
+        "noise_r": 0.9515331369876016,
+        "G": 171.3271543146061
+    }
+}

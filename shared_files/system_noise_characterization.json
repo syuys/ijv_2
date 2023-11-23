@@ -1,0 +1,12 @@
+{
+    "__comment__": "The  coefficient is based on: CV = a*Reflectance^(-b) + c. Reflectance is the intensity measured by QEPro. CV is the expected noise w.r.t the reflectance.",
+    "source": "20230214_phantom_signal",
+    "Integration time [s]": 0.1,
+    "Pixel number of MovingAverage": 23,
+    "R square": 0.9940528306570842,
+    "Coefficient": {
+        "a": 0.6747059392931978,
+        "b": 0.8813044098403537,
+        "c": 0.0008539896163221191
+    }
+}

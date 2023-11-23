@@ -1,0 +1,80 @@
+{
+    "Domain": {
+        "Media": [
+            {
+                "n": 1.457,
+                "g": 1,
+                "name": "0: Fiber",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "n": 1,
+                "g": 1,
+                "name": "1: Air",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "n": 1.45,
+                "g": 1,
+                "name": "2: PLA",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "n": 1.51,
+                "g": 1,
+                "name": "3: Prism",
+                "mua": 0,
+                "mus": 0
+            },
+            {
+                "mua": 0,
+                "g": 0,
+                "name": "4: Phantom body",
+                "n": 1.4,
+                "mus": 2.59
+            }
+        ],
+        "Dim": [
+            800,
+            800,
+            260
+        ],
+        "OriginType": 1
+    },
+    "Shapes": [],
+    "Forward": {
+        "T0": 0.0,
+        "Dt": 5e-09,
+        "T1": 5e-09
+    },
+    "Optode": {
+        "Detector": [
+        ],
+        "Source": {
+            "Type": "pencil",
+            "Pos": [
+                400,
+                400,
+                19.9999
+            ],
+            "Dir": [
+                0,
+                0,
+                1
+            ],
+            "Param1": [
+                0,
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    "Session": {
+        "DoNormalize": 1,
+        "ID": "test"
+    }
+}

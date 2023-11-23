@@ -32,6 +32,7 @@ bloodConcSet = np.array([138, 174])
 bloodSO2Set = {"ijv": np.linspace(0.4, 0.8, 5),
                "cca": np.linspace(0.9, 1.0, 2)
                }  # for analysis of blood SO2
+issaveMuaBound = False
 
 
 # %% main
@@ -94,6 +95,16 @@ for tissue in tissueType:
         plt.ylabel("mua [1/cm]")
         plt.title(tissue + "'s mua interp data")
         plt.show()
+
+# save interpolated data
+for tissue, data in interpData.items():
+    if not os.path.isdir(os.path.join("all_tissue_interp_mua", tissue)):
+        os.mkdir(os.path.join("all_tissue_interp_mua", tissue))
+    for source, value in data.items():
+        interp = np.concatenate((wlProject[:, None], value.reshape(-1, len(wlProject)).T), axis=1)
+        interp = pd.DataFrame(interp, columns=["wl"] + ["mua (1/cm)"]*(interp.shape[1]-1))
+        interp.to_csv(os.path.join("all_tissue_interp_mua", tissue, source+".csv"), 
+                      index=False)
         
 # show mua upper bound and lower bound and save to .json file
 muaRange = {}
@@ -102,6 +113,8 @@ for tissue in interpData.keys():
     allmua = np.array(list(interpData[tissue].values()))
     muaRange[tissue] = [np.floor(np.nanmin(allmua)*1e3)/1e3, np.ceil(np.nanmax(allmua)*1e3)/1e3]
     print(f"{tissue}'s mua ---> min={np.nanmin(allmua)}, max={np.nanmax(allmua)}")
-    
-with open("mua_bound.json", "w") as f:
-    json.dump(muaRange, f, indent=4)
+
+# save
+if issaveMuaBound:
+    with open("mua_bound.json", "w") as f:
+        json.dump(muaRange, f, indent=4)

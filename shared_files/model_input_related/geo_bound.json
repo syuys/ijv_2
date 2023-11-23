@@ -1,0 +1,65 @@
+{
+    "__comment__": "The geo(structure) bounds below are all in unit of [mm] or [degrees].",
+    "Skin": {
+        "__comment": "Data are collected from - Application of high‐frequency ultrasound to assess facial skin thickness in association with gender, age, and BMI in healthy adults",
+        "Thickness": {
+            "Average": 1.1642,                
+            "Std": 0.2107,
+            "Range":[null, null]
+        }
+    },
+    "Fat": {
+        "__comment__": "Data are collected from - Measurement of mean subcutaneous fat thickness: eight standardised ultrasound sites compared to 216 randomly selected sites",
+        "Thickness": {
+            "Average": 1.304,                
+            "Std": 0.745,
+            "Range":[null, null]
+        }    
+    },
+    "IJV": {
+        "__comment__": "1: ChangePct is defined by me as the large or small to normal(mean) ratio. 2: Because I don't know the data of major or minor axis from ting wen's thesis is on collapsed state or distension state, I consider it as the data in normal state below.",
+        "Depth": {
+            "Average": 14.5,                
+            "Std": 3.62,
+            "Range":[4.1, 29.4]
+        },
+        "MajorAxisNormal": {
+            "Average": 7.5,
+            "Std": 2,
+            "Range":[2.3, 15]
+        },
+        "MinorAxisNormal": {
+            "Average": 5.5,
+            "Std": 0.4, 
+            "Range": [2.3, 10]
+        },
+        "MajorAxisChangePct": {
+            "Average": 0.081,
+            "Std": null, 
+            "Range": [0.081, 0.081]
+        },
+        "MinorAxisChangePct": {
+            "Average": 0.127,
+            "Std": null, 
+            "Range": [0.127, 0.127]
+        }
+    },
+    "CCA": {
+        "__comment__": "sAng is in degrees",
+        "Radius": {
+            "Average": 3.5,
+            "Std": 0.5,
+            "Range": [0.6, 6.1]
+        },
+        "sDist": {
+            "Average": 1.5,
+            "Std": 0.5,
+            "Range": [0.6, 4.9]
+        },
+        "sAng": {
+            "Average": 101.5,
+            "Std": null,
+            "Range": [19.9, 183.1]
+        }
+    }
+}
