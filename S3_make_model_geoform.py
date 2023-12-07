@@ -10,6 +10,7 @@ Created on Fri Oct 22 17:03:27 2021
 import numpy as np
 import json
 import os
+from TissueBuilder import TissueBuilder
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 plt.rcParams.update({"mathtext.default": "regular"})
@@ -64,22 +65,29 @@ def getXofIntersection(theta, major, minor):
 modelSize = modelParam["ModelSize"]
 hardwareParam = modelParam["HardwareParam"]
 geoParam = modelParam["GeoParam"]
+
 # model
 modelX = convertUnit(modelSize["XSize"])
 modelY = convertUnit(modelSize["YSize"])
 modelZ = convertUnit(modelSize["ZSize"])
 print(f"Total Number of volume voxels = {modelX*modelY*modelZ}.")
+
 # source
 srcHolderX = convertUnit(hardwareParam["Source"]["Holder"]["XSize"])
 srcHolderY = convertUnit(hardwareParam["Source"]["Holder"]["YSize"])
 srcHolderZ = convertUnit(hardwareParam["Source"]["Holder"]["ZSize"])
 irraWinRadius = convertUnit(hardwareParam["Source"]["Holder"]["IrraWinRadius"])
+
 # detecotr
 detHolderX = convertUnit(hardwareParam["Detector"]["Holder"]["XSize"])  # sds limit - srcHolderX/2 + prismLength/2
 detHolderY = convertUnit(hardwareParam["Detector"]["Holder"]["YSize"])
 detHolderZ = convertUnit(hardwareParam["Detector"]["Holder"]["ZSize"])
 prismY = convertUnit(hardwareParam["Detector"]["Prism"]["legSize"])  # prismX need not be set
 prismZ = convertUnit(hardwareParam["Detector"]["Prism"]["legSize"])
+
+# skin and fat
+skinDepth = convertUnit(geoParam["Skin"]["Thickness"])
+fatDepth = convertUnit(geoParam["Fat"]["Thickness"])
 
 # ijv
 ijvDepth = convertUnit(geoParam["IJV"]["Depth"])  # mm to grid
@@ -115,96 +123,37 @@ ccaShiftZ = convertUnit(cca2ijvInMM * np.sin(sAng))  # mm to grid
 
 # %% make volume
 
-### start to construct
+### new method
+fac = TissueBuilder(modelX, modelY, modelZ)
+fac.set_srcHolder(2, srcHolderX, srcHolderY, srcHolderZ)
+fac.set_srcAir(1, irraWinRadius)
+fac.set_detHolder(2, srcHolderX, detHolderX, detHolderY, detHolderZ)
+fac.set_detPrism(3, srcHolderX, detHolderX, detHolderZ, prismY, prismZ)
+fac.set_detFiber(0, srcHolderX, detHolderX, detHolderZ, prismY, prismZ)
+fac.set_muscle(6, detHolderZ)
+fac.set_skin(4, detHolderZ, skinDepth)
+fac.set_fat(5, detHolderZ, skinDepth, fatDepth)
 
-# model and air (in the beginning)
-vol = np.ones((modelX, modelY, modelZ))
+# fac.set_vessel(7, ijvMajorAxisLarge, ijvMinorAxisLarge, 0, 0, detHolderZ, ijvDepth)  # large ijv
+fac.set_vessel(7, ijvMajorAxisSmall, ijvMinorAxisSmall, 0, 0, detHolderZ, ijvDepth)  # small ijv
+fac.set_vessel(8, ccaRadius+2, ccaRadius+2, ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # large cca
+# fac.set_vessel(8, ccaRadius-2, ccaRadius-2, ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # small cca
 
-# source
-vol[modelX//2-srcHolderX//2:modelX//2+srcHolderX//2, 
-    modelY//2-srcHolderY//2:modelY//2+srcHolderY//2,
-    :srcHolderZ] = 2  # holder
-for x in range(modelX//2-irraWinRadius, modelX//2+irraWinRadius):
-    for y in range(modelY//2-irraWinRadius, modelY//2+irraWinRadius):
-        isDist1 = np.sqrt((modelX//2-x)**2 + (modelY//2-y)**2) < irraWinRadius
-        isDist2 = np.sqrt((modelX//2-(x+1))**2 + (modelY//2-y)**2) < irraWinRadius
-        isDist3 = np.sqrt((modelX//2-x)**2 + (modelY//2-(y+1))**2) < irraWinRadius
-        isDist4 = np.sqrt((modelX//2-(x+1))**2 + (modelY//2-(y+1))**2) < irraWinRadius
-        if isDist1 or isDist2 or isDist3 or isDist4:
-            vol[x][y] = 1  # air
+# fac.set_vessel(7, ijvMajorAxisLarge, ijvMinorAxisLarge, 0, 0, detHolderZ, ijvDepth)  # large ijv
+# fac.set_vessel(8, ijvMajorAxisSmall, ijvMinorAxisSmall, 0, 0, detHolderZ, ijvDepth)  # small ijv
+# fac.set_vessel(9, ccaRadius, ccaRadius, ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # cca
 
-# detector
-vol[modelX//2+srcHolderX//2:modelX//2+srcHolderX//2+detHolderX, 
-    modelY//2-detHolderY//2:modelY//2+detHolderY//2,
-    :detHolderZ] = 2  # first holder
-vol[modelX//2-srcHolderX//2-detHolderX:modelX//2-srcHolderX//2, 
-    modelY//2-detHolderY//2:modelY//2+detHolderY//2,
-    :detHolderZ] = 2  # second holder
-vol[modelX//2+srcHolderX//2:modelX//2+srcHolderX//2+detHolderX, 
-    modelY//2-prismY//2:modelY//2+prismY//2,
-    detHolderZ-prismZ:detHolderZ] = 3  # first prism
-vol[modelX//2-srcHolderX//2-detHolderX:modelX//2-srcHolderX//2, 
-    modelY//2-prismY//2:modelY//2+prismY//2,
-    detHolderZ-prismZ:detHolderZ] = 3  # second prism
-vol[modelX//2+srcHolderX//2:modelX//2+srcHolderX//2+detHolderX, 
-    modelY//2-prismY//2:modelY//2+prismY//2,
-    :detHolderZ-prismZ] = 0  # first fiber
-vol[modelX//2-srcHolderX//2-detHolderX:modelX//2-srcHolderX//2, 
-    modelY//2-prismY//2:modelY//2+prismY//2,
-    :detHolderZ-prismZ] = 0  # second fiber
-
-# muscle
-vol[:, :, detHolderZ:] = 6
-
-# skin
-# skinDepth = int(paramSet["skin"]["x"]*scalePercentage)
-skinDepth = convertUnit(geoParam["Skin"]["Thickness"])
-vol[:, :, detHolderZ:detHolderZ+skinDepth] = 4
-
-# fat
-# fatDepth = int(paramSet["fat"]["x"]*scalePercentage)
-fatDepth = convertUnit(geoParam["Fat"]["Thickness"])
-vol[:, :, detHolderZ+skinDepth:detHolderZ+skinDepth+fatDepth] = 5
-
-# ijv - perturbed area (large minus small)
-for y in range(-ijvMajorAxisLarge, ijvMajorAxisLarge):
-    for z in range(-ijvMinorAxisLarge, ijvMinorAxisLarge):
-        isDist1 = isInEllipse(y, z, ijvMajorAxisLarge, ijvMinorAxisLarge)
-        isDist2 = isInEllipse(y+1, z, ijvMajorAxisLarge, ijvMinorAxisLarge)
-        isDist3 = isInEllipse(y, z+1, ijvMajorAxisLarge, ijvMinorAxisLarge)
-        isDist4 = isInEllipse(y+1, z+1, ijvMajorAxisLarge, ijvMinorAxisLarge)
-        if isDist1 or isDist2 or isDist3 or isDist4:
-            vol[:, y+modelY//2, z+detHolderZ+ijvDepth] = 7
-
-# ijv - area when collapsed
-for y in range(-ijvMajorAxisSmall, ijvMajorAxisSmall):
-    for z in range(-ijvMinorAxisSmall, ijvMinorAxisSmall):
-        isDist1 = isInEllipse(y, z, ijvMajorAxisSmall, ijvMinorAxisSmall)
-        isDist2 = isInEllipse(y+1, z, ijvMajorAxisSmall, ijvMinorAxisSmall)
-        isDist3 = isInEllipse(y, z+1, ijvMajorAxisSmall, ijvMinorAxisSmall)
-        isDist4 = isInEllipse(y+1, z+1, ijvMajorAxisSmall, ijvMinorAxisSmall)
-        if isDist1 or isDist2 or isDist3 or isDist4:
-            vol[:, y+modelY//2, z+detHolderZ+ijvDepth] = 8
-
-# cca
-for y in range(-ccaRadius, ccaRadius):
-    for z in range(-ccaRadius, ccaRadius):
-        isDist1 = isInEllipse(y, z, ccaRadius, ccaRadius)
-        isDist2 = isInEllipse(y+1, z, ccaRadius, ccaRadius)
-        isDist3 = isInEllipse(y, z+1, ccaRadius, ccaRadius)
-        isDist4 = isInEllipse(y+1, z+1, ccaRadius, ccaRadius)
-        if isDist1 or isDist2 or isDist3 or isDist4:
-            vol[:, y+modelY//2+ccaShiftY, z+detHolderZ+ijvDepth+ccaShiftZ] = 9  # ijvDepth, 58
-
+vol = fac.vol
 
 tissue = ["Fiber", "Air", "PLA", "Prism", "Skin", "Fat", "Muscle", "Perturbed region", "IJV", "CCA"]
 legendfontsize = 13
 
 # %% front view - all and only tissue
 # plt.imshow(vol[modelX//2, 160:320, 24:200].T)
-plt.imshow(vol[modelX//2, modelY//2-85:modelY//2+85, 24:160].T)  # 190 for upperedge, 165 for cca
+plt.imshow(vol[modelX//2, modelY//2-85:modelY//2+85, detHolderZ:160].T)  # 190 for upperedge, 165 for cca
 plt.axis("off")
-# plt.colorbar()
+plt.colorbar()
+plt.title("front view - only tissue")
 plt.show()
 
 # tmp = vol[modelX//2, modelY//2-85:modelY//2+85, 24:170].T
