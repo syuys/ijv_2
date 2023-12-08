@@ -31,10 +31,3 @@ newcfg.detphotons=detp.data;
 [flux2, detp2, vol2, seeds2]=mcxlab(newcfg);
 jac=sum(flux2.data,4);
 imagesc(log10(abs(squeeze(jac(:,30,:)))))
-
-newcfg.outputtype='rf';
-newcfg.omega=2*pi*100e6; % 100 MHz RF modulation
-newcfg.detphotons=detp.data;
-rfjac=mcxlab(newcfg);
-jac=sum(rfjac.data,4);
-figure;imagesc(log10(abs(squeeze(jac(:,30,:)))))

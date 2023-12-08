@@ -1,0 +1,138 @@
+{
+  "Session": {
+    "ID": "cube60",
+    "Photons": 1000000,
+    "DoMismatch": false,
+    "DoAutoThread": true,
+    "DoSaveVolume": true,
+    "DoPartialPath": true,
+    "DoNormalize": true,
+    "DoSaveRef": false,
+    "DoSaveExit": false,
+    "DoSaveSeed": false,
+    "DoDCS": false,
+    "DoSpecular": false,
+    "DebugFlag": "0",
+    "SaveDataMask": "5",
+    "OutputFormat": "mc2",
+    "OutputType": "x",
+    "RNGSeed": 1648335518
+  },
+  "Forward": {
+    "T0": 0,
+    "T1": 4.99999996961265e-9,
+    "Dt": 4.99999996961265e-9
+  },
+  "Optode": {
+    "Source": {
+      "Type": "pencil",
+      "Pos": [
+        29,
+        29,
+        0
+      ],
+      "Dir": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "Param1": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "Param2": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Detector": [
+      {
+        "Pos": [
+          29,
+          19,
+          0
+        ],
+        "R": 1
+      },
+      {
+        "Pos": [
+          29,
+          39,
+          0
+        ],
+        "R": 1
+      },
+      {
+        "Pos": [
+          19,
+          29,
+          0
+        ],
+        "R": 1
+      },
+      {
+        "Pos": [
+          39,
+          29,
+          0
+        ],
+        "R": 1
+      }
+    ]
+  },
+  "Shapes": [
+    {
+      "Name": "cubic60"
+    },
+    {
+      "Origin": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "Grid": {
+        "Tag": 1,
+        "Size": [
+          60,
+          60,
+          60
+        ]
+      }
+    }
+  ],
+  "Domain": {
+    "OriginType": true,
+    "Dim": [
+      60,
+      60,
+      60
+    ],
+    "Media": [
+      {
+        "mua": 0,
+        "mus": 1.19209289550781e-7,
+        "g": 1,
+        "n": 1
+      },
+      {
+        "mua": 0.00499999988824129,
+        "mus": 1,
+        "g": 0.00999999977648258,
+        "n": 1.3700000047683716
+      },
+      {
+        "mua": 0.0020000000949949,
+        "mus": 5,
+        "g": 0.8999999761581421,
+        "n": 1
+      }
+    ]
+  }
+}

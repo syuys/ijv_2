@@ -1,0 +1,49 @@
+{
+    "__comment__": "The units below are all in mm or none. ChangePct is from normal(mean) to large or small",
+    "LowerNeck": {
+        "IJV": {
+            "Depth": null,
+            "MajorAxisNormal": null,
+            "MinorAxisNormal": null,
+            "MajorAxisChangePct": null,
+            "MinorAxisChangePct": null
+        }
+    },
+    "MiddleNeck": {
+        "IJV": {
+            "Depth": null,
+            "MajorAxisNormal": 6.286,
+            "MinorAxisNormal": 3.69,
+            "MajorAxisChangePct": 0.054,
+            "MinorAxisChangePct": 0.085
+        }
+    },
+    "UpperNeck_old": {
+        "IJV": {
+            "Depth": 12.439,
+            "MajorAxisNormal": 5.616,
+            "MinorAxisNormal": 2.657,
+            "MajorAxisChangePct": 0.032,
+            "MinorAxisChangePct": 0.064
+        },
+        "CCA": {
+            "Radius": 3.092,
+            "sDist": 1.36,
+            "sAng": 174.188
+        }
+    },
+    "UpperNeck_new": {
+        "IJV": {
+            "Depth": 12.355,
+            "MajorAxisNormal": 5.574,
+            "MinorAxisNormal": 2.573,
+            "MajorAxisChangePct": 0.042,
+            "MinorAxisChangePct": 0.089
+        },
+        "CCA": {
+            "Radius": 2.953,
+            "sDist": 1.453,
+            "sAng": 176.204
+        }
+    }
+}

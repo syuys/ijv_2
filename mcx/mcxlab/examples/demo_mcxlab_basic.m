@@ -15,6 +15,7 @@ cfg.gpuid=1;
 % cfg.gpuid='11'; % use two GPUs together
 cfg.autopilot=1;
 cfg.prop=[0 0 1 1;0.005 1 0 1.37];
+cfg.seed = 1;
 cfg.tstart=0;
 cfg.tend=5e-9;
 cfg.tstep=1e-10;

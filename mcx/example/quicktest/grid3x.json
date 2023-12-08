@@ -2,7 +2,7 @@
 	"Session":	{
 		"ID":	"grid3x",
 		"Photons":	10000000,
-		"RNGSeed":	1648335518,
+		"RNGSeed":	1648335519,
 		"DoMismatch":	false,
 		"DoSaveVolume":	true,
 		"DoNormalize":	true,
@@ -37,35 +37,26 @@
 				"g":	0.01,
 				"n":	1
 			}],
-		"Dim":	[180, 180, 180],
+		"Dim":	[180, 160, 120],
 		"OriginType":	1
 	},
 	"Optode":	{
 		"Source":	{
 			"Type":	"pencil",
-			"Pos":	[89, 89, 0],
+			"Pos":	[75, 80, 0],
 			"Dir":	[0, 0, 1, 0],
 			"Param1":	[0, 0, 0, 0],
 			"Param2":	[0, 0, 0, 0],
 			"SrcNum":	1
 		},
 		"Detector":	[{
-				"Pos":	[89, 59, 0],
-				"R":	2
-			}, {
-				"Pos":	[89, 119, 0],
-				"R":	2
-			}, {
-				"Pos":	[59, 89, 0],
-				"R":	2
-			}, {
-				"Pos":	[119, 89, 0],
+				"Pos":	[105, 80, 0],
 				"R":	2
 			}]
 	},
 	"Shapes": [
 		{"Name":     "cube180"},
 		{"Origin":   [0,0,0]},
-		{"Grid":     {"Tag":1, "Size":[180,180,180]}}
+		{"Grid":     {"Tag":1, "Size":[180,160,120]}}
 	]
 }

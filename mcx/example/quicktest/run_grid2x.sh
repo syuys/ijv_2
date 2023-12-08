@@ -1,3 +1,2 @@
 #!/bin/sh
-time ../../bin/mcx -n 1e7 -f grid2x.json
-
+time ../../bin/mcx -f head4layer_mcxlab.json --reflect 0

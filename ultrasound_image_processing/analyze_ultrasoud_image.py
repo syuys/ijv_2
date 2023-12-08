@@ -148,15 +148,15 @@ modelX = convertUnit(132)
 modelY = convertUnit(38)
 modelZ = convertUnit(32)
 # source
-srcHolderX = convertUnit(28)
-srcHolderY = convertUnit(28)
+srcHolderX = convertUnit(16)
+srcHolderY = convertUnit(16)
 srcHolderZ = convertUnit(6)
 irraWinRadius = convertUnit(2.5)
 # detecotr
-detHolderX = convertUnit(17)
+detHolderX = convertUnit(20)
 detHolderY = convertUnit(14)
 detHolderZ = convertUnit(6)
-prismX = convertUnit(17)
+prismX = convertUnit(20)
 prismY = convertUnit(5)
 prismZ = convertUnit(5)
 # 0.3675
@@ -220,13 +220,14 @@ shiftNumber = np.round(modelY//2 - np.mean(legalRowSet["ijv"]), 0).astype(int)
 vol[:, np.array(legalRowSet["ijv"])+shiftNumber, np.array(legalColSet["ijv"])+int(detHolderZ)] = 7 if state == "IJVLarge" else 8    
 # cca
 # if state == "IJVSmall":
-#     vol[:, np.array(legalRowSet["cca"])+shiftNumber, np.array(legalColSet["cca"])+int(detHolderZ)] = 9
+#    vol[:, np.array(legalRowSet["cca"])+shiftNumber, np.array(legalColSet["cca"])+int(detHolderZ)] = 9
 if state == "IJVLarge":
     vol[:, np.array(legalRowSet["cca"])+shiftNumber, np.array(legalColSet["cca"])+int(detHolderZ)] = 9
-vol[:, 78, 62] = 7  # fill the hole
+    vol[:, 78, 62] = 7  # fill the hole
 plt.imshow(vol[int(modelX//2), :, :])
 plt.show()
 plt.imshow(vol[int(modelX//2), :, :].T)
+plt.colorbar()
 plt.show()
 plt.imshow(vol[:, :, 0])
 plt.show()
@@ -234,7 +235,7 @@ plt.imshow(vol[:, int(modelY//2), :].T)
 plt.show()
 # save file
 vol = vol.astype(np.uint8)
-np.save(file="perturbed_large_to_small", arr=vol)
+# ####### np.save(file="perturbed_large_to_small_smaller_holder", arr=vol)
 # sio.savemat('testIJV.mat', {'testIJV': vol})
 # sio.savemat('testIJV.mat', {'testIJV': vol[:, :, :int(detHolderZ)]})
 

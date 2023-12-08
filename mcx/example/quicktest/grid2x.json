@@ -1,8 +1,8 @@
 {
 	"Session":	{
 		"ID":	"grid2x",
-		"Photons":	10000000,
-		"RNGSeed":	1648335518,
+		"Photons":	20000000,
+		"RNGSeed":	-1,
 		"DoMismatch":	false,
 		"DoSaveVolume":	true,
 		"DoNormalize":	true,
@@ -13,9 +13,9 @@
 		"DoAutoThread":	true,
 		"DoDCS":	false,
 		"DoSpecular":	false,
-		"DebugFlag":	0,
+		"DebugFlag":	"P",
 		"SaveDataMask":	5,
-		"OutputFormat":	"mc2",
+		"OutputFormat":	"jnii",
 		"OutputType":	"x"
 	},
 	"Forward":	{
@@ -32,10 +32,10 @@
 				"g":	1,
 				"n":	1
 			}, {
-				"mua":	0.005,
+				"mua":	0,
 				"mus":	1,
 				"g":	0.01,
-				"n":	1
+				"n":	1.5
 			}],
 		"Dim":	[120, 120, 120],
 		"OriginType":	1
@@ -52,20 +52,11 @@
 		"Detector":	[{
 				"Pos":	[59, 39, 0],
 				"R":	2
-			}, {
-				"Pos":	[59, 79, 0],
-				"R":	2
-			}, {
-				"Pos":	[39, 59, 0],
-				"R":	2
-			}, {
-				"Pos":	[79, 59, 0],
-				"R":	2
 			}]
 	},
 	"Shapes": [
 		{"Name":     "cube120"},
-		{"Origin":   [0,0,0]},
-		{"Grid":     {"Tag":1, "Size":[120,120,120]}}
+		{"Grid":     {"Tag":0, "Size":[120,120,120]}},
+		{"Subgrid":     {"Tag":1, "Size":[120,120,120], "O":[0, 0, 0]}}
 	]
 }

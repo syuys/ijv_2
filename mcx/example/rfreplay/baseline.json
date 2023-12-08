@@ -2,21 +2,21 @@
 	"Session":{
 		"ID":"baseline",
 		"DoAutoThread":1,
-		"Photons":100000000
+		"Photons":1000000
 	},
 	"Forward":{
 		"T0":0,
 		"T1":5e-09,
-		"Dt":5e-10
+		"Dt":5e-09
 	},
 	"Optode":{
 		"Source":{
-			"Pos":[30,30,0],
+			"Pos":[20,20,0],
 			"Dir":[0,0,1]
 		},
 		"Detector":[
 			{
-				"Pos":[15,30,0],
+				"Pos":[10,20,0],
 				"R":2
 			}
 		]
@@ -38,19 +38,12 @@
 			}
 		],
 		"MediaFormat":"byte",
-		"Dim":[60,60,60],
+		"Dim":[40, 40, 20],
 		"VolumeFile":""
 	},
-	"Shapes":{
-		"_ArrayType_":"uint8",
-		"_ArraySize_":[60,60,60],
-		"_ArrayZipType_":"zlib",
-		"_ArrayZipSize_":[1,216000],
-		"_ArrayZipData_":"eJztwTENAAAAw6DUv+l52A0UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACP
-AXeFS+4=
-"
-	}
+	"Shapes":[
+		{"Name":     "cube60"},
+		{"Origin":   [0,0,0]},
+		{"Grid":     {"Tag":1, "Size":[40, 40, 20]}}
+	]
 }

@@ -64,6 +64,7 @@ while(~feof(fid))
 	hd=fread(fid,7,'uint'); % version, maxmedia, detnum, colcount, totalphoton, detected, savedphoton
 	if(hd(1)~=1) error('version higher than 1 is not supported'); end
     unitmm=fread(fid,1,'float32');
+    display(unitmm);
 	seedbyte=fread(fid,1,'uint');
     normalizer=fread(fid,1,'float32');
 	respin=fread(fid,1,'int');

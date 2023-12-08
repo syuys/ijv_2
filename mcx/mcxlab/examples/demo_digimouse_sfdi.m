@@ -61,6 +61,7 @@ cfg.autopilot=1;
 cfg.gpuid=1;
 cfg.unitinmm=0.4*2;
 cfg.debuglevel='P';
+cfg.seed = 1;
 
 flux=mcxlab(cfg);
 fcw=flux.data;

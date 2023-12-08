@@ -1,0 +1,35 @@
+{
+    "__comment__": "The units below are all in mm or none. ChangePct is from normal(mean) to large or small",
+    "LowerNeck": {
+        "IJV": {
+            "Depth": null,
+            "MajorAxisNormal": null,
+            "MinorAxisNormal": null,
+            "MajorAxisChangePct": null,
+            "MinorAxisChangePct": null
+        }
+    },
+    "MiddleNeck": {
+        "IJV": {
+            "Depth": 15.146,
+            "MajorAxisNormal": 5.486,
+            "MinorAxisNormal": 2.585,
+            "MajorAxisChangePct": 0.075,
+            "MinorAxisChangePct": 0.117
+        }
+    },
+    "UpperNeck": {
+        "IJV": {
+            "Depth": 14.418,
+            "MajorAxisNormal": 5.501,
+            "MinorAxisNormal": 2.609,
+            "MajorAxisChangePct": 0.052,
+            "MinorAxisChangePct": 0.102
+        },
+        "CCA": {
+            "Radius": 3.847,
+            "sDist": 1.477,
+            "sAng": 170.528
+        }
+    }
+}
