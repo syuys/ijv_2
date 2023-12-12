@@ -18,9 +18,9 @@ plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams["figure.dpi"] = 300
 
 # %% parameters and function
-projectID = "20230516_contrast_investigate_wl_sdsrange_5to45_g99"
+projectID = "20231212_contrast_invivo_geo_simulation_cca_pulse"
 pathSet = glob(os.path.join(projectID, "ijv*"))  # *skin*fat*, *-1_std, *+0_std, ijv*, *EU*
-muaSource = "from coefficients"  # "from mua bound" or "from coefficients"
+muaSource = "from mua bound"  # "from mua bound" or "from coefficients"
 # muaBoundPercentile = np.linspace(0.5, 0.5, 1)
 
 #                               skin,   fat,muscle,   ijv,   cca
@@ -50,7 +50,7 @@ muaBoundPercentile = np.array([
 
 tissueComTemTag = "tissue_composition_template_ijv_0.7.json"
 tissueSet = ["4: Skin", "5: Fat", "6: Muscle", "8: IJV", "9: CCA"]
-isSave = False
+isSave = True
 
 def calculate_mua(b, s, w, f, m, c, oxy, deoxy, water, fat, melanin, collagen):
     """
@@ -93,7 +93,7 @@ if muaSource == "from mua bound":
     for path in pathSet:
         ijvType = path.split("/")[-1].split("_")[1]
         for p in muaBoundPercentile:
-            print(f"========= {path.split('/')[1]},  {p}  =========")
+            print(f"========= {os.path.split(path)[-1]},  {p}  =========")
             for idx, tissue in enumerate(tissueSet):
                 target = tissue.split(" ")[-1].lower()
                 bound = muabound[target]

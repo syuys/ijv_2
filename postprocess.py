@@ -202,16 +202,31 @@ def analyzeReflectance(sessionID, muaPathSet, detectorNA, updateResultFile=True,
     for muaPath in muaPathSet:
         with open(muaPath) as f:
             tmp = json.load(f)
-        mua.append([tmp["1: Air"],
-                    tmp["2: PLA"],
-                    tmp["3: Prism"],
-                    tmp["4: Skin"],
-                    tmp["5: Fat"],
-                    tmp["6: Muscle"],
-                    tmp["7: Muscle or IJV (Perturbed Region)"],
-                    tmp["8: IJV"],
-                    tmp["9: CCA"]
-                    ])
+        if config["Type"] == "ijv":
+            mua.append([tmp["1: Air"],
+                        tmp["2: PLA"],
+                        tmp["3: Prism"],
+                        tmp["4: Skin"],
+                        tmp["5: Fat"],
+                        tmp["6: Muscle"],
+                        tmp["7: Muscle or IJV (Perturbed Region)"],
+                        tmp["8: IJV"],
+                        tmp["9: CCA"]
+                        ])
+            
+        elif config["Type"] == "ijv_cca_both_pulse":
+            mua.append([tmp["1: Air"],
+                        tmp["2: PLA"],
+                        tmp["3: Prism"],
+                        tmp["4: Skin"],
+                        tmp["5: Fat"],
+                        tmp["6: Muscle"],
+                        tmp["7: IJV"],
+                        tmp["8: CCA"]
+                        ])
+        else:
+            raise Exception("config type is not valid !!")
+    
     mua = np.array(mua).T
     
     # get reflectance

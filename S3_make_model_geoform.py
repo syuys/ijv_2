@@ -26,18 +26,19 @@ folder = "ultrasound_image_processing"
 # with open(os.path.join(folder, "blood_vessel_segmentation_line.json")) as f:
 #     paramSet = json.load(f)[subject][date][state]
 
-projectID = "20230426_contrast_investigate_ijvdepth_sdsrange_5to45_g99"
-changeType = "pulse"  # depth, minor
-times = "150%"  # +0
-unit = "mm"  # std
+projectID = "20231212_contrast_invivo_geo_simulation_cca_pulse"
+# changeType = "pulse"  # depth, minor
+# times = "150%"  # +0
+# unit = "mm"  # std
 ccafixed = False
 # sessionID = f"ijv_dis_{changeType}_{times}_{unit}"
-sessionID = "ijv_dis_depth_+0_std"  # doesn't matter for dis or col,  ijv_dis_depth_+0_std  ijv_dis_minor_-3.5_mm
+sessionID = "ijv_col_EU_skin_50%_fat_50%_muscle_50%_blood_50%"  # doesn't matter for dis or col,  ijv_dis_depth_+0_std  ijv_dis_minor_-3.5_mm
+ccaRadiusType = "RadiusDis"
 voxelLength = 0.25  # [mm]
-isSaveVolume = False
+isSaveVolume = True
 # fileName = f"tinyHolder_contrast_sds_5to45_cca_sAng_{sessionID.split('_')[-1]}"
-# fileName = f"tinyHolder_contrast_sds_5to45_{sessionID.split('_')[2]}_upperNeck"
-fileName = f"tinyHolder_contrast_sds_5to45_ijv_{changeType}_{times}"
+fileName = f"tinyHolder_contrast_sds_5to45_{sessionID.split('_')[2]}_upperNeck_{sessionID[:7]}"
+# fileName = f"tinyHolder_contrast_sds_5to45_ijv_{changeType}_{times}"
 
 with open(os.path.join(projectID, sessionID, "model_parameters.json")) as f:
     modelParam = json.load(f)
@@ -134,14 +135,25 @@ fac.set_muscle(6, detHolderZ)
 fac.set_skin(4, detHolderZ, skinDepth)
 fac.set_fat(5, detHolderZ, skinDepth, fatDepth)
 
-# fac.set_vessel(7, ijvMajorAxisLarge, ijvMinorAxisLarge, 0, 0, detHolderZ, ijvDepth)  # large ijv
-fac.set_vessel(7, ijvMajorAxisSmall, ijvMinorAxisSmall, 0, 0, detHolderZ, ijvDepth)  # small ijv
-fac.set_vessel(8, ccaRadius+2, ccaRadius+2, ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # large cca
-# fac.set_vessel(8, ccaRadius-2, ccaRadius-2, ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # small cca
-
-# fac.set_vessel(7, ijvMajorAxisLarge, ijvMinorAxisLarge, 0, 0, detHolderZ, ijvDepth)  # large ijv
-# fac.set_vessel(8, ijvMajorAxisSmall, ijvMinorAxisSmall, 0, 0, detHolderZ, ijvDepth)  # small ijv
-# fac.set_vessel(9, ccaRadius, ccaRadius, ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # cca
+if ccaRadiusType == "RadiusNormal":
+    fac.set_vessel(7, ijvMajorAxisLarge, ijvMinorAxisLarge, 
+                   0, 0, detHolderZ, ijvDepth)  # large ijv
+    fac.set_vessel(8, ijvMajorAxisSmall, ijvMinorAxisSmall, 
+                   0, 0, detHolderZ, ijvDepth)  # small ijv
+    fac.set_vessel(9, ccaRadius, ccaRadius, 
+                   ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # cca
+elif ccaRadiusType == "RadiusDis":
+    fac.set_vessel(7, ijvMajorAxisSmall, ijvMinorAxisSmall, 
+                   0, 0, detHolderZ, ijvDepth)  # small ijv
+    fac.set_vessel(8, ccaRadius, ccaRadius, 
+                   ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # large cca
+elif ccaRadiusType == "RadiusCol":
+    fac.set_vessel(7, ijvMajorAxisLarge, ijvMinorAxisLarge, 
+                   0, 0, detHolderZ, ijvDepth)  # large ijv
+    fac.set_vessel(8, ccaRadius, ccaRadius, 
+                   ccaShiftY, ccaShiftZ, detHolderZ, ijvDepth)  # small cca
+else:
+    raise Exception("ccaRadiusType is not defined !")
 
 vol = fac.vol
 
@@ -152,7 +164,7 @@ legendfontsize = 13
 # plt.imshow(vol[modelX//2, 160:320, 24:200].T)
 plt.imshow(vol[modelX//2, modelY//2-85:modelY//2+85, detHolderZ:160].T)  # 190 for upperedge, 165 for cca
 plt.axis("off")
-plt.colorbar()
+plt.colorbar(format=lambda x, _: f"{x:.0f}")
 plt.title("front view - only tissue")
 plt.show()
 
@@ -267,9 +279,11 @@ plt.show()
 
 # save file
 if isSaveVolume:
-    print("File will be saved !!")
     path = os.path.join(folder, projectID)
     if not os.path.isdir(path):
         os.mkdir(path)
     vol = vol.astype(np.uint8)
-    np.save(file=os.path.join(path, f"perturbed_{fileName}"), arr=vol)
+    # vol = np.array(vol) & 0xF
+    # np.save(file=os.path.join(path, f"perturbed_{fileName}"), arr=vol)
+    np.savez_compressed(file=os.path.join(path, f"perturbed_{fileName}"), data=vol)
+    print("File has been saved !!")

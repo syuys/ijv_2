@@ -13,9 +13,10 @@ import shutil
 # %% parameters
 preProjectID = "20230505_contrast_investigate_op_sdsrange_5to45_g99"
 preSessionID = "ijv_dis_blood_0%"
-curProjectID = "20230911_check_led_pattern_sdsrange_5to45_g99"
+curProjectID = "20231212_contrast_invivo_geo_simulation_cca_pulse"
 curSessionIDSet = [
-                    "ijv_dis_pulse_50%",
+                    "ijv_dis_EU_skin_50%_fat_50%_muscle_50%_blood_50%",
+                    "ijv_col_EU_skin_50%_fat_50%_muscle_50%_blood_50%",
                    ]
 
 # %% make project ID folder and copy file (run.py ...etc)

@@ -15,7 +15,7 @@ class TissueBuilder:
         self.modelX = modelX
         self.modelY = modelY
         self.modelZ = modelZ
-        self.vol = np.ones((modelX, modelY, modelZ)) # all air '1'
+        self.vol = np.ones((modelX, modelY, modelZ), dtype=int) # all air '1'
     
     
     def set_srcHolder(self, tag, srcHolderX, srcHolderY, srcHolderZ):

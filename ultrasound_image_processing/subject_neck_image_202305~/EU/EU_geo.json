@@ -27,8 +27,12 @@
             "MinorAxisChangePct": 0.102
         },
         "CCA": {
-            "Radius": 3.847,
-            "sDist": 1.477,
+            "RadiusNormal": 3.847,
+            "RadiusDis": 3.962,
+            "RadiusCol": 3.684,
+            "sDistCCANormal": 1.477,
+            "sDistCCADis": 1.362,
+            "sDistCCACol": 1.64,
             "sAng": 170.528
         }
     }

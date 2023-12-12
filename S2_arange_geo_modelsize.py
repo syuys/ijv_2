@@ -12,11 +12,15 @@ from glob import glob
 import numpy as np
 
 # %% parameters
-projectID = "20230911_check_led_pattern_sdsrange_5to45_g99"
-pathIDSet = glob(os.path.join(projectID, "ijv*"))  # *skin*fat*, ijv*
+projectID = "20231212_contrast_invivo_geo_simulation_cca_pulse"
+pathIDSet = glob(os.path.join(projectID, "ijv_col_EU*"))  # *skin*fat*, ijv*
 subject = "EU"
 neckPos = "UpperNeck"
-geoBoundPath = "shared_files/model_input_related/geo_bound.json"
+ccaRadiusType = "RadiusDis"
+sDistType = "sDistCCADis"
+geoBoundPath = os.path.join("shared_files",
+                            "model_input_related",
+                            "geo_bound.json")
 modelParamPath = "model_parameters.json"
 # stdtimesWay = 0  # eval(" float(pathID.split('_')[-2]) ")
 modelX = 240  # mm
@@ -24,7 +28,7 @@ modelY = 120  # mm
 modelZ =  80  # mm
 
 # %% load
-with open(geoBoundPath) as f:
+with open(geoBoundPath, encoding="utf-8") as f:
     geoBound = json.load(f)
 ijvDepthAve = geoBound["IJV"]["Depth"]["Average"]
 ijvDepthStd = geoBound["IJV"]["Depth"]["Std"]
@@ -38,11 +42,13 @@ if len(pathIDSet) == 0:
     raise Exception("Error in pathIDSet !")
 
 for pathID in pathIDSet:
-    sessionID = pathID.split('/')[-1]
+    sessionID = os.path.split(pathID)[-1]
     print(f"\nsessionID: {sessionID}")
     
     if sessionID.split("_")[2] == subject:
-        with open(os.path.join("ultrasound_image_processing/subject_neck_image_202305~", subject, f"{subject}_geo.json")) as f:
+        with open(os.path.join("ultrasound_image_processing", 
+                               "subject_neck_image_202305~", 
+                               subject, f"{subject}_geo.json")) as f:
             geoSubject = json.load(f)[neckPos]
         # ijv
         ijvDepth = geoSubject["IJV"]["Depth"]
@@ -52,8 +58,8 @@ for pathID in pathIDSet:
         minorAxisChangePct = geoSubject["IJV"]["MinorAxisChangePct"]
         
         # cca
-        cca_radius = geoSubject["CCA"]["Radius"]
-        cca_sDist = geoSubject["CCA"]["sDist"]
+        cca_radius = geoSubject["CCA"][ccaRadiusType]
+        cca_sDist = geoSubject["CCA"][sDistType]
         cca_sAng = geoSubject["CCA"]["sAng"]
         
     else:
@@ -77,8 +83,7 @@ for pathID in pathIDSet:
             ijvMajor = ijvMajorAve
         else:
             ijvMajor = ijvMajorAve
-            ijvMinor = ijvMinorAve
-        print(f"IJV minor: {ijvMinor}, major: {ijvMajor}")
+            ijvMinor = ijvMinorAve        
         
         # other ijv parameters
         majorAxisChangePct = geoBound["IJV"]["MajorAxisChangePct"]["Average"]
@@ -88,13 +93,15 @@ for pathID in pathIDSet:
         if sessionID.split("_")[2] == "ccasAng":
             cca_sAng = float(sessionID.split("_")[3])
         else:
-            cca_sAng = geoBound["CCA"]["sAng"]["Average"]
-        print(f"cca_sAng: {cca_sAng}")
+            cca_sAng = geoBound["CCA"]["sAng"]["Average"]        
         
         # other cca paramters
         cca_radius = geoBound["CCA"]["Radius"]["Average"]
         cca_sDist = geoBound["CCA"]["sDist"]["Average"]
     
+    print(f"IJV minor: {ijvMinor}, major: {ijvMajor}")
+    print(f"CCA radius: {cca_radius}")
+    print(f"cca_sAng: {cca_sAng}")
     
     # set geo        
     geo = {

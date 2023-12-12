@@ -215,7 +215,14 @@ class MCX:
                                               int(self.convertUnit(designatedVolDim[2]))
                                               ]
         else:
-            vol = np.load(self.config["VolumePath"])
+            fileExt = self.config["VolumePath"].split(".")[-1]
+            if fileExt == "npy":
+                vol = np.load(self.config["VolumePath"])
+            elif fileExt == "npz":
+                vol = np.load(self.config["VolumePath"])["data"]
+            else:
+                raise Exception("extension name of volume file is not valid !!")
+                
             self.mcxInput["Domain"]["Dim"] = list(vol.shape)
         
         # set Domain OriginType
@@ -320,7 +327,63 @@ class MCX:
             self.mcxInput["Domain"]["Media"][9]["mua"] = 0 if wmc is True else mua["9: CCA"]
             self.mcxInput["Domain"]["Media"][9]["mus"] = self.modelParameters["OptParam"]["CCA"]["mus"]
         
-        if self.config["Type"] == "phantom":
+        elif self.config["Type"] == "ijv_cca_both_pulse":
+            # 0: Fiber (mua always 0)
+            self.mcxInput["Domain"]["Media"][0]["n"] = self.modelParameters["OptParam"]["Fiber"]["n"]
+            self.mcxInput["Domain"]["Media"][0]["g"] = self.modelParameters["OptParam"]["Fiber"]["g"]
+            self.mcxInput["Domain"]["Media"][0]["mua"] = 0
+            self.mcxInput["Domain"]["Media"][0]["mus"] = self.modelParameters["OptParam"]["Fiber"]["mus"]
+            
+            # 1: Air (mua always 0)
+            self.mcxInput["Domain"]["Media"][1]["n"] = self.modelParameters["OptParam"]["Air"]["n"]
+            self.mcxInput["Domain"]["Media"][1]["g"] = self.modelParameters["OptParam"]["Air"]["g"]
+            self.mcxInput["Domain"]["Media"][1]["mua"] = 0
+            self.mcxInput["Domain"]["Media"][1]["mus"] = self.modelParameters["OptParam"]["Air"]["mus"]
+            
+            # 2: PLA
+            self.mcxInput["Domain"]["Media"][2]["n"] = self.modelParameters["OptParam"]["PLA"]["n"]
+            self.mcxInput["Domain"]["Media"][2]["g"] = self.modelParameters["OptParam"]["PLA"]["g"]
+            self.mcxInput["Domain"]["Media"][2]["mua"] = 0 if wmc is True else mua["2: PLA"]
+            self.mcxInput["Domain"]["Media"][2]["mus"] = self.modelParameters["OptParam"]["PLA"]["mus"]
+            
+            # 3: Prism (mua always 0)
+            self.mcxInput["Domain"]["Media"][3]["n"] = self.modelParameters["OptParam"]["Prism"]["n"]
+            self.mcxInput["Domain"]["Media"][3]["g"] = self.modelParameters["OptParam"]["Prism"]["g"]
+            self.mcxInput["Domain"]["Media"][3]["mua"] = 0
+            self.mcxInput["Domain"]["Media"][3]["mus"] = self.modelParameters["OptParam"]["Prism"]["mus"]
+            
+            # 4: Skin
+            self.mcxInput["Domain"]["Media"][4]["n"] = self.modelParameters["OptParam"]["Skin"]["n"]
+            self.mcxInput["Domain"]["Media"][4]["g"] = self.modelParameters["OptParam"]["Skin"]["g"]
+            self.mcxInput["Domain"]["Media"][4]["mua"] = 0 if wmc is True else mua["4: Skin"]
+            self.mcxInput["Domain"]["Media"][4]["mus"] = self.modelParameters["OptParam"]["Skin"]["mus"]
+            
+            # 5: Fat
+            self.mcxInput["Domain"]["Media"][5]["n"] = self.modelParameters["OptParam"]["Fat"]["n"]
+            self.mcxInput["Domain"]["Media"][5]["g"] = self.modelParameters["OptParam"]["Fat"]["g"]
+            self.mcxInput["Domain"]["Media"][5]["mua"] = 0 if wmc is True else mua["5: Fat"]
+            self.mcxInput["Domain"]["Media"][5]["mus"] = self.modelParameters["OptParam"]["Fat"]["mus"]
+            
+            # 6: Muscle
+            self.mcxInput["Domain"]["Media"][6]["n"] = self.modelParameters["OptParam"]["Muscle"]["n"]
+            self.mcxInput["Domain"]["Media"][6]["g"] = self.modelParameters["OptParam"]["Muscle"]["g"]
+            self.mcxInput["Domain"]["Media"][6]["mua"] = 0 if wmc is True else mua["6: Muscle"]
+            self.mcxInput["Domain"]["Media"][6]["mus"] = self.modelParameters["OptParam"]["Muscle"]["mus"]
+            
+            # 8: IJV
+            self.mcxInput["Domain"]["Media"][7]["n"] = self.modelParameters["OptParam"]["IJV"]["n"]
+            self.mcxInput["Domain"]["Media"][7]["g"] = self.modelParameters["OptParam"]["IJV"]["g"]
+            self.mcxInput["Domain"]["Media"][7]["mua"] = 0 if wmc is True else mua["8: IJV"]
+            self.mcxInput["Domain"]["Media"][7]["mus"] = self.modelParameters["OptParam"]["IJV"]["mus"]
+            
+            # 9: CCA
+            self.mcxInput["Domain"]["Media"][8]["n"] = self.modelParameters["OptParam"]["CCA"]["n"]
+            self.mcxInput["Domain"]["Media"][8]["g"] = self.modelParameters["OptParam"]["CCA"]["g"]
+            self.mcxInput["Domain"]["Media"][8]["mua"] = 0 if wmc is True else mua["9: CCA"]
+            self.mcxInput["Domain"]["Media"][8]["mus"] = self.modelParameters["OptParam"]["CCA"]["mus"]
+        
+        
+        elif self.config["Type"] == "phantom":
             # 0: Fiber
             self.mcxInput["Domain"]["Media"][0]["n"] = self.modelParameters["OptParam"]["Fiber"]["n"]
             self.mcxInput["Domain"]["Media"][0]["g"] = self.modelParameters["OptParam"]["Fiber"]["g"]
@@ -350,6 +413,9 @@ class MCX:
             else:
                 self.mcxInput["Domain"]["Media"][4]["mua"] = 0
                 self.mcxInput["Domain"]["Media"][4]["mus"] = self.modelParameters["OptParam"]["Phantom body"]["mus"]
+        
+        else:
+            raise Exception("config type is not valid !!")
 
 
     def setOptodes(self):

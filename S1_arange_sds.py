@@ -12,8 +12,8 @@ from glob import glob
 
 
 # %% parameters
-projectID = "20230911_check_led_pattern_sdsrange_5to45_g99"
-sessionIDSet = [i.split("/")[-1] for i in glob(os.path.join(projectID, "ijv*"))]  # *skin*fat*, "ijv*"
+projectID = "20231212_contrast_invivo_geo_simulation_cca_pulse"
+sessionIDSet = [os.path.split(i)[-1] for i in glob(os.path.join(projectID, "ijv*"))]  # *skin*fat*, "ijv*"
 sdsfilepath = "model_parameters.json"
 
 fiber = []

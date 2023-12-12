@@ -12,7 +12,7 @@ from glob import glob
 import os
 
 # %% parameters
-projectID = "20230911_check_led_pattern_sdsrange_5to45_g99"
+projectID = "20231212_contrast_invivo_geo_simulation_cca_pulse"
 pathSet = glob(os.path.join(projectID, "ijv*"))  # ijv*, *skin_100%*fat*, *skin_0%*fat*, *EU*_100%*
 modelParamPath = "model_parameters.json"
 musSource = "from mus bound"  # "from ab bound" or "from mus bound"
@@ -24,7 +24,10 @@ g_other = 0.9
 
 # %% arange
 if musSource == "from mus bound":
-    with open("shared_files/model_input_related/optical_properties/mus_bound.json") as f:
+    with open(os.path.join("shared_files", 
+                           "model_input_related", 
+                           "optical_properties", 
+                           "mus_bound.json")) as f:
         musBound = json.load(f)
 
     for path in pathSet:
@@ -60,7 +63,10 @@ if musSource == "from mus bound":
             json.dump(modelParam, f, indent=4)
 
 elif musSource == "from ab bound":
-    with open("shared_files/model_input_related/optical_properties/ab_bound_of_musp.json") as f:
+    with open(os.path.join("shared_files", 
+                           "model_input_related", 
+                           "optical_properties", 
+                           "ab_bound_of_musp.json")) as f:
         abBound = json.load(f)
     muspBaseWl = abBound["base wl"]
     for path in pathSet:

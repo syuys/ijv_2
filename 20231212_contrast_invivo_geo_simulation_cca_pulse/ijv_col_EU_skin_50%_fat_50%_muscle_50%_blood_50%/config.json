@@ -1,0 +1,12 @@
+{
+    "Type": "ijv_cca_both_pulse",
+    "PhotonNum": 500000000,
+    "VoxelSize": 0.25,
+    "BinaryPath": "/home/md703/syu/ijv_2/mcx/bin",
+    "VolumePath": "/home/md703/syu/ijv_2/ultrasound_image_processing/20231212_contrast_invivo_geo_simulation_cca_pulse/perturbed_tinyHolder_contrast_sds_5to45_EU_upperNeck_ijv_col.npz",
+    "MCXInputPath": "/home/md703/syu/ijv_2/shared_files/mcx_input_template/ijv_dense_symmetric_detectors_backgroundfiber.json",
+    "OutputPath": "/home/md703/syu/ijv_2_output/20231212_contrast_invivo_geo_simulation_cca_pulse",
+    "CustomizedCommands": [
+        "--savedetflag DPV --seed -1 --outputformat jnii"
+    ]
+}
