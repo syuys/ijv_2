@@ -6,12 +6,15 @@ Created on Thu Dec 16 21:17:21 2021
 @author: md703
 """
 
+import sys
+import os
+curPath = os.path.split(os.getcwd())[0]
+sys.path.append(curPath)
 from mcx_ultrasound_opsbased import MCX
 import numpy as np
 from glob import glob
 import postprocess
 import json
-import os
 import shutil
 
 # parameter
