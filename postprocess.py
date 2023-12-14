@@ -230,7 +230,7 @@ def analyzeReflectance(sessionID, muaPathSet, detectorNA, updateResultFile=True,
     mua = np.array(mua).T
     
     # get reflectance
-    if config["Type"] == "ijv":
+    if config["Type"] == "ijv" or config["Type"] == "ijv_cca_both_pulse":
         reflectance = getReflectance(mua=mua,
                                      innerIndex=modelParameters["OptParam"]["Prism"]["n"], 
                                      outerIndex=modelParameters["OptParam"]["Fiber"]["n"], 
@@ -257,7 +257,7 @@ def analyzeReflectance(sessionID, muaPathSet, detectorNA, updateResultFile=True,
     finalReflectanceMean = finalReflectance.mean(axis=0)
     finalReflectanceCV = finalReflectanceStd / finalReflectanceMean
     # arange detectors
-    if config["Type"] == "ijv":
+    if config["Type"] == "ijv" or config["Type"] == "ijv_cca_both_pulse":
         # arange and fold detectors. [cvSampleNum, detectorNum, 3 (width), muaNum]
         movingAverageFinalReflectance = finalReflectance.reshape(finalReflectance.shape[0], 
                                                                  -1, 

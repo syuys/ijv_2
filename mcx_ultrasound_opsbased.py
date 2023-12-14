@@ -420,7 +420,7 @@ class MCX:
 
     def setOptodes(self):
         if self.modelParameters["HardwareParam"]["Source"]["Beam"]["Type"] == "anglepattern":
-            if self.config["Type"] == "ijv":
+            if self.config["Type"] == "ijv" or self.config["Type"] == "ijv_cca_both_pulse":
                 # detector (help to extend to left and right)
                 modelX = self.mcxInput["Domain"]["Dim"][0]
                 modelY = self.mcxInput["Domain"]["Dim"][1]
