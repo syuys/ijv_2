@@ -14,7 +14,7 @@ import time
 
 
 # parameters
-projectID = "20230819_contrast_investigate_sameUpperedge2skin_differentMinor_sdsrange_5to45_g99"
+projectID = "20231212_contrast_invivo_geo_simulation_cca_pulse"
 projectPath = f"/home/md703/syu/ijv_2_output/{projectID}"
 sessionPathSet = glob(os.path.join(projectID, "ijv*"))
 host = "md703@192.168.31.104"  # original: md703@192.168.31.237

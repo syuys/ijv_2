@@ -1,6 +1,6 @@
 # filename: .gitignore
 
-# ignore source_power
+# ignore source_power folder
 source_power/
 
 # ignore .npy files in ultrasound_image_processing
@@ -12,6 +12,5 @@ ultrasound_image_processing/20230715_contrast_invivo_geo_simulation
 ultrasound_image_processing/20230819_contrast_investigate_ijvpulserange_sdsrange_5to45_g99
 ultrasound_image_processing/20230819_contrast_investigate_sameUpperedge2skin_differentMinor_sdsrange_5to45_g99
 
-# ignore .jnii in mcx
-mcx/example/quicktest/grid3x_source.jnii
-mcx/example/quicktest/grid3x_detector.jnii
+# ignore mcx folder
+mcx/
