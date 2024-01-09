@@ -1,2 +1,2 @@
 # ijv_2
-Mainly, base on the project "md703/ijv", and proceed.
+Master's work at NTU. Use Monte Carlo modeling and in-vivo experiment to determine the optimal source-detector distance for internal jugular vein (ijv) oximetry.
